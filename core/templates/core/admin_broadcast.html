@@ -1,0 +1,206 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Broadcast - Naza Admin</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* Estilos base del dashboard */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #121212;
+            color: #E0E0E0;
+            display: flex;
+        }
+
+        /* Sidebar Logo Styles */
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .logo-mini {
+            width: 30px;
+            /* mix-blend-mode: multiply; */
+            /* filter: invert(1); */
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1E1E1E;
+            border-right: 1px solid #333;
+            height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .broadcast-card {
+            background-color: #1E1E1E;
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            background: #252525;
+            border: 1px solid #444;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            resize: none;
+            margin: 20px 0;
+            box-sizing: border-box;
+        }
+
+        textarea:focus {
+            outline: 1px solid #BB86FC;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+
+        .btn-publish {
+            background-color: #BB86FC;
+            color: black;
+        }
+
+        .btn-publish:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .btn-stop {
+            background-color: #CF6679;
+            color: black;
+            margin-top: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .active {
+            background-color: rgba(187, 134, 252, 0.2);
+            color: #BB86FC;
+            border: 1px solid #BB86FC;
+        }
+
+        .inactive {
+            background-color: #333;
+            color: #888;
+        }
+
+        .nav-item {
+            padding: 15px;
+            color: #888;
+            text-decoration: none;
+            display: flex;
+            gap: 10px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .nav-item.active {
+            background-color: #333;
+            color: #BB86FC;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo-area">
+            <img src="{% static 'img/naza_logo_v2.png' %}" class="logo-mini">
+            <span>Naza Admin</span>
+        </div>
+
+        <a href="{% url 'admin_dashboard' %}" class="nav-item">
+            <span class="material-icons">dashboard</span> General
+        </a>
+        <a href="{% url 'admin_users_list' %}" class="nav-item">
+            <span class="material-icons">people</span> Usuarios
+        </a>
+        <a href="{% url 'admin_audit' %}" class="nav-item">
+            <span class="material-icons">gavel</span> Auditoría IA
+        </a>
+
+        <a href="{% url 'admin_broadcast' %}" class="nav-item active">
+            <span class="material-icons">campaign</span> Broadcast
+        </a>
+        <a href="{% url 'home' %}" class="nav-item">
+            <span class="material-icons">chat</span> Volver al Chat
+        </a>
+        <a href="{% url 'logout' %}" class="nav-item" style="margin-top: auto; color: #CF6679;">
+            <span class="material-icons">logout</span> Salir
+        </a>
+    </aside>
+
+    <main class="main">
+        <div class="broadcast-card">
+            <span class="material-icons" style="font-size: 3rem; color: #BB86FC; margin-bottom: 10px;">campaign</span>
+            <h2>Enviar Notificación Global</h2>
+            <p style="color: #888;">El mensaje aparecerá en la pantalla de todos los estudiantes conectados.</p>
+
+            {% if alerta %}
+            <div class="status-badge active">🟢 Transmitiendo ahora</div>
+            <p style="font-style: italic; color: #FFF;">"{{ alerta.mensaje }}"</p>
+            {% else %}
+            <div class="status-badge inactive">⚪ Sin mensajes activos</div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <textarea name="mensaje"
+                    placeholder="Escribe tu anuncio aquí... (Ej: 'Mantenimiento en 10 min')"></textarea>
+
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button type="submit" name="accion" value="publicar" class="btn btn-publish">
+                        PUBLICAR
+                    </button>
+                    {% if alerta %}
+                    <button type="submit" name="accion" value="apagar" class="btn btn-stop">
+                        APAGAR
+                    </button>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+
+</html>

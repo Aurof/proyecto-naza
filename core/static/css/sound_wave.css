@@ -1,0 +1,67 @@
+/* --- SOUND WAVE VISUALIZER (LOGO STYLE) --- */
+.sound-wave-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    /* Spacing between bars */
+    width: 60%;
+    height: 60%;
+    z-index: 20;
+    /* Above orb background */
+    opacity: 0;
+    /* Hidden by default */
+    transition: opacity 0.3s;
+    pointer-events: none;
+    /* Let clicks pass through to orb */
+}
+
+.bar {
+    width: 12px;
+    background-color: #fff;
+    border-radius: 10px;
+    will-change: height;
+    /* Smooth transition for real-time updates */
+    transition: height 0.08s ease-out;
+}
+
+/* BASE "N" SHAPE STATS */
+/* Left leg */
+.bar:nth-child(1) {
+    height: 30%;
+}
+
+/* First peak */
+.bar:nth-child(2) {
+    height: 75%;
+}
+
+/* Middle Dip */
+.bar:nth-child(3) {
+    height: 40%;
+}
+
+/* Second peak */
+.bar:nth-child(4) {
+    height: 75%;
+}
+
+/* Right leg */
+.bar:nth-child(5) {
+    height: 30%;
+}
+
+/* ACTIVE STATE (Speaking) */
+.orb.speaking .sound-wave-container {
+    opacity: 1;
+}
+
+/* Hide icon when speaking */
+.orb.speaking .material-icons {
+    opacity: 0;
+    transition: opacity 0.2s;
+}

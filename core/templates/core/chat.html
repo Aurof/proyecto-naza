@@ -1,0 +1,1912 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naza Bot - Chat</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/chat.css' %}?v=32">
+    <link rel="stylesheet" href="{% static 'css/sound_wave.css' %}">
+</head>
+
+<body>
+    <!-- Mobile Menu Overlay -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Mobile Hamburger Button -->
+    <button id="mobile-menu-btn" onclick="toggleSidebar()" style="display:none;">
+        <span class="material-icons">menu</span>
+    </button>
+
+    <aside class="sidebar">
+        <div class="logo-area">
+            <img src="{% static 'img/naza_logo_v2.png' %}" class="logo-mini">
+            <span>Naza Bot</span>
+        </div>
+        <button class="new-chat-btn">
+            <span class="material-icons">add</span> Nueva Sesión
+        </button>
+        <div class="history-list" id="history-box">
+            {% if chats %}
+            {% for chat in chats %}
+            <div class="history-item" id="chat-item-{{ chat.id_conversacion }}"
+                onclick="cargarConversacion({{ chat.id_conversacion }})">
+
+                <span class="chat-title-text">{{ chat.titulo }}</span>
+
+                <button class="delete-chat-btn" onclick="deleteChat(event, {{ chat.id_conversacion }})"
+                    title="Eliminar chat">
+                    <span class="material-icons" style="font-size: 1.1rem;">delete</span>
+                </button>
+
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="padding:10px; color:#666; font-size:0.8rem;">No hay conversaciones aún.</p>
+            {% endif %}
+        </div>
+        <div class="user-footer" id="user-menu-trigger" style="cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="avatar"
+                    style="width: 30px; height: 30px; font-size: 1rem; background: #BB86FC; color: black;">
+                    {{ request.user.username|slice:":1" }}
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: bold; font-size: 0.9rem;">{{ request.user.username }}</span>
+                    <span style="font-size: 0.7rem; color: #888;">En línea</span>
+                </div>
+            </div>
+            <span class="material-icons" style="color: #888;">expand_less</span>
+        </div>
+    </aside>
+
+    <div class="user-menu-popup" id="user-menu-popup">
+        <!-- (Contenido del menú de usuario sin cambios...) -->
+        <div id="view-main" class="submenu-view active">
+            <div class="menu-header">
+                <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
+                    <div class="avatar"
+                        style="width: 35px; height: 35px; background: var(--accent); color: white; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold;">
+                        {{ request.user.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <h3>{{ request.user.first_name }}</h3>
+                        <p>{{ request.user.email }}</p>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="menu-body">
+                {% if user.is_superuser %}
+                <a href="{% url 'admin_dashboard' %}" class="menu-btn" style="text-decoration: none;">
+                    <span class="material-icons" style="color: var(--secondary);">dashboard</span> Panel Admin
+                </a>
+                {% endif %}
+
+                <a href="{% url 'historial_errores' %}" class="menu-btn" style="text-decoration: none;">
+                    <span class="material-icons">history_edu</span> Historial de Errores
+                </a>
+
+                <button class="menu-btn" onclick="startTutorial()">
+                    <span class="material-icons">help_outline</span> Ver Tutorial
+                </button>
+                <button class="menu-btn" onclick="openScenarioHub()" id="scenario-selector-btn">
+                    <span class="material-icons" style="color: #03DAC6;">theater_comedy</span>
+                    <span id="current-scenario-text">Conversación Libre</span>
+                </button>
+                <button class="menu-btn" onclick="openGameHub()">
+                    <span class="material-icons" style="color: #FFD700;">emoji_events</span> Gamificación y Stats
+                </button>
+                <div style="height: 1px; background: #3c4043; margin: 8px 0;"></div>
+                <!-- THEME TOGGLE -->
+                <button class="menu-btn" id="theme-btn">
+                    <span class="material-icons" id="theme-icon">dark_mode</span>
+                    <span id="theme-text">Modo Oscuro</span>
+                </button>
+                <button class="menu-btn" onclick="showSubmenu('view-voice')">
+                    <span class="material-icons">record_voice_over</span> Configurar Voz
+                </button>
+                <div style="height: 1px; background: #3c4043; margin: 8px 0;"></div>
+                <a href="{% url 'logout' %}" class="menu-btn logout">
+                    <span class="material-icons">logout</span> Cerrar Sesión
+                </a>
+            </div>
+        </div>
+
+        <div id="view-voice" class="submenu-view">
+            <div class="menu-body">
+                <button class="btn-back" onclick="showSubmenu('view-main')">
+                    <span class="material-icons">arrow_back</span> Volver
+                </button>
+                <h4 style="margin: 0 0 15px 0; color: white;">Voz del Tutor</h4>
+
+                <div class="voice-form">
+                    <label>Selecciona la Voz:</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="setting-voice-code" style="flex: 1;">
+                            <option value="en-US-Standard-B">Inglés (H) - Estándar</option>
+                            <option value="en-US-Wavenet-C">Inglés (M) - WaveNet (Pro)</option>
+                            <option value="es-ES-Standard-B">Español (H) - Estándar</option>
+                            <option value="es-ES-Wavenet-C">Español (M) - WaveNet (Pro)</option>
+                        </select>
+                        <button type="button" onclick="previewVoice()" title="Escuchar demostración"
+                            style="background: #3c4043; border: 1px solid #5f6368; color: #8ab4f8; border-radius: 4px; padding: 5px 10px; cursor: pointer; display: flex; align-items: center;">
+                            <span class="material-icons" style="font-size: 1.2rem;">volume_up</span>
+                        </button>
+                    </div>
+
+                    <label>Velocidad (<span id="speed-val">1.0</span>x):</label>
+                    <input type="range" id="setting-speed" min="0.5" max="1.5" step="0.1" value="1.0"
+                        oninput="document.getElementById('speed-val').innerText = this.value">
+
+                    <button onclick="saveVoiceSettings()"
+                        style="width:100%; background:#BB86FC; color:black; border:none; padding:10px; border-radius:4px; margin-top:15px; font-weight:bold; cursor:pointer;">
+                        Guardar Cambios
+                    </button>
+                    <p id="save-status"
+                        style="font-size:0.8rem; color:#81c995; text-align:center; margin-top:5px; display:none;">
+                        ¡Guardado!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="orb-container">
+
+        <div class="gamification-bar" id="gamification-bar" onclick="openGameHub()"
+            style="cursor: pointer; transition: transform 0.2s; {% if not progreso.mostrar_gamificacion %}display:none;{% else %}display:flex;{% endif %}">
+            <div class="stat-pill" title="Nivel Actual">
+                <span class="material-icons pill-icon">military_tech</span>
+                <span id="stat-level">Nvl {{ progreso.nivel }}</span>
+            </div>
+            <div class="stat-pill" title="Experiencia">
+                <span class="material-icons pill-icon">bolt</span>
+                <span id="stat-xp">{{ progreso.experiencia }} XP</span>
+            </div>
+            <div class="stat-pill" title="Racha de Días">
+                <span class="material-icons pill-icon">local_fire_department</span>
+                <span id="stat-streak">{{ progreso.racha_actual }}</span>
+            </div>
+        </div>
+
+        <div class="scenario-selector" id="scenario-selector-btn" onclick="openScenarioHub()">
+            <span class="material-icons" id="current-scenario-icon">chat</span>
+            <span id="current-scenario-text">Conversación Libre</span>
+            <span class="material-icons" style="font-size: 1rem; opacity: 0.5;">expand_more</span>
+        </div>
+
+        <div id="scenario-hub-overlay" class="game-hub-overlay">
+            <div class="game-hub-card" style="width: 600px;">
+                <button class="btn-close-hub" onclick="closeScenarioHub()">&times;</button>
+                <div class="hub-header">
+                    <h2>Elige un Escenario</h2>
+                    <p style="color:#888;">Naza actuará un rol para que practiques situaciones reales.</p>
+                </div>
+                <div class="hub-content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+
+                    <div class="role-card active"
+                        onclick="selectScenario('general', 'chat', 'Conversación Libre', this)">
+                        <span class="material-icons" style="color: #BB86FC;">chat</span>
+                        <div>
+                            <strong>Libre</strong>
+                            <small>Tu amigo tutor normal.</small>
+                        </div>
+                    </div>
+
+                    <div class="role-card" onclick="selectScenario('cafe', 'local_cafe', 'Pedir un Café', this)">
+                        <span class="material-icons" style="color: #FF9800;">local_cafe</span>
+                        <div>
+                            <strong>Cafetería</strong>
+                            <small>Mesero en Londres.</small>
+                        </div>
+                    </div>
+
+                    <div class="role-card" onclick="selectScenario('airport', 'flight_land', 'Inmigración', this)">
+                        <span class="material-icons" style="color: #03DAC6;">flight_land</span>
+                        <div>
+                            <strong>Aeropuerto</strong>
+                            <small>Oficial de aduanas.</small>
+                        </div>
+                    </div>
+
+                    <div class="role-card" onclick="selectScenario('interview', 'work', 'Entrevista', this)">
+                        <span class="material-icons" style="color: #CF6679;">work</span>
+                        <div>
+                            <strong>Entrevista</strong>
+                            <small>Reclutador de Google.</small>
+                        </div>
+                    </div>
+
+                    <div class="role-card"
+                        onclick="selectScenario('doctor', 'medical_services', 'Consulta Médica', this)">
+                        <span class="material-icons" style="color: #81C995;">medical_services</span>
+                        <div>
+                            <strong>Doctor</strong>
+                            <small>Describe tus síntomas.</small>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Caption (Pensando / Errores) -->
+        <div id="live-caption" style="display:block;">Haz clic en el orbe para hablar...</div>
+
+        <div class="orb" id="magic-orb">
+            <!-- Sound Wave Visualizer (Hidden by default, visible when speaking) -->
+            <div class="sound-wave-container">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+            <span class="material-icons" id="orb-icon">mic</span>
+        </div>
+
+        <div class="chat-messages" id="messages-box">
+        </div>
+
+        <!-- Botones Flotantes (Historial, Errores y Teclado) -->
+        <div class="fab-container">
+
+            <!-- 1. La Orejita (Botón de Ayuda) -->
+            <button onclick="window.mostrarAyudaFonetica(this.dataset.text)" title="Mejorar Pronunciación"
+                id="btn-pronunciation-help" class="fab-btn fab-help">
+                <span class="material-icons" style="font-size: 1.5rem;">hearing</span>
+            </button>
+
+            <!-- 2. Historial de Pronunciación -->
+            <button onclick="togglePronunciationDrawer()" title="Historial de Pronunciación" class="fab-btn fab-red">
+                <span class="material-icons">graphic_eq</span>
+            </button>
+
+            <!-- 3. Errores Gramaticales -->
+            <button onclick="toggleErrorsDrawer()" title="Ver errores gramaticales" id="btn-errors-toggle"
+                class="fab-btn fab-red">
+                <span class="material-icons">rule</span>
+            </button>
+
+            <!-- 4. Historial Normal -->
+            <button onclick="toggleHistoryDrawer()" title="Ver conversación completa" class="fab-btn">
+                <span class="material-icons">forum</span>
+            </button>
+
+            <!-- 5. Teclado -->
+            <button onclick="toggleKeyboard()" title="Escribir texto" class="fab-btn">
+                <span class="material-icons">keyboard</span>
+            </button>
+        </div>
+
+        <div id="keyboard-area" style="display:none; position:absolute; bottom:20px; right: 80px; width:300px;">
+            <input type="text" id="text-input" class="input-box"
+                style="background:#222; border:1px solid #444; display:block; width:100%; border-radius:20px; padding: 10px; color: white;"
+                placeholder="Escribe aquí...">
+        </div>
+
+    </main>
+
+
+
+    <div id="levelup-popup" class="levelup-overlay">
+        <div class="levelup-card">
+            <span class="material-icons" style="font-size: 5rem; color: #FFD700;">emoji_events</span>
+            <h2>¡NIVEL ASCENDIDO!</h2>
+            <p>Ahora eres nivel <span id="new-level-num" style="font-weight:bold; color:#BB86FC;">2</span></p>
+            <button onclick="document.getElementById('levelup-popup').classList.remove('active')">¡GENIAL!</button>
+        </div>
+    </div>
+
+    <!-- History Drawer -->
+    <aside class="history-drawer" id="history-drawer">
+        <div class="drawer-header">
+            <h3>Conversación</h3>
+            <button onclick="toggleHistoryDrawer()" style="background:none; border:none; color:#888; cursor:pointer;">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="drawer-body" id="full-history-box">
+        </div>
+    </aside>
+
+    <!-- Errors Drawer -->
+    <aside class="errors-drawer" id="errors-drawer">
+        <div class="drawer-header">
+            <h3>Errores Gramaticales</h3>
+            <button onclick="toggleErrorsDrawer()" style="background:none; border:none; color:#888; cursor:pointer;">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="drawer-body" id="errors-box">
+            <p class="no-errors-msg" style="color: #666; text-align: center; margin-top: 20px;">No hay errores en esta
+                conversación.</p>
+        </div>
+    </aside>
+
+    <!-- Pronunciation Drawer -->
+    <aside class="errors-drawer" id="pronunciation-drawer">
+        <div class="drawer-header">
+            <h3>Historial de Pronunciación</h3>
+            <button onclick="togglePronunciationDrawer()"
+                style="background:none; border:none; color:#888; cursor:pointer;">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="drawer-body" id="pronunciation-box">
+            <p class="no-errors-msg" style="color: #666; text-align: center; margin-top: 20px;">Cargando historial...
+            </p>
+        </div>
+    </aside>
+
+    <div id="game-hub-overlay" class="game-hub-overlay">
+        <div class="game-hub-card">
+            <button class="btn-close-hub" onclick="closeGameHub()">&times;</button>
+
+            <div class="hub-header">
+                <h2>Mi Progreso</h2>
+                <div class="hub-tabs">
+                    <button class="tab-btn active" onclick="switchTab('tab-stats')">Estadísticas</button>
+                    <button class="tab-btn" onclick="switchTab('tab-leaderboard')">Ranking Global</button>
+                    <button class="tab-btn" onclick="switchTab('tab-config')">Configuración</button>
+                </div>
+            </div>
+
+            <div class="hub-content">
+                <div id="tab-stats" class="tab-pane active">
+                    <div class="big-stats-grid">
+                        <div class="big-stat-box">
+                            <span class="material-icons" style="color:#FFD700; font-size:3rem;">military_tech</span>
+                            <h3 id="hub-level">{{ progreso.nivel }}</h3>
+                            <p>Nivel Actual</p>
+                        </div>
+                        <div class="big-stat-box">
+                            <span class="material-icons" style="color:#03DAC6; font-size:3rem;">bolt</span>
+                            <h3 id="hub-xp">{{ progreso.experiencia }}</h3>
+                            <p>XP Total</p>
+                        </div>
+                        <div class="big-stat-box">
+                            <span class="material-icons"
+                                style="color:#FF5722; font-size:3rem;">local_fire_department</span>
+                            <h3 id="hub-streak">{{ progreso.racha_actual }}</h3>
+                            <p>Racha (Días)</p>
+                        </div>
+                    </div>
+                    <div style="text-align:center; margin-top:20px; color:#888;">
+                        <p>¡Sigue practicando para alcanzar el siguiente nivel!</p>
+                    </div>
+                </div>
+
+                <div id="tab-leaderboard" class="tab-pane">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Usuario</th>
+                                <th>Nivel</th>
+                                <th>XP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body">
+                            <tr>
+                                <td colspan="4">Cargando ranking...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="tab-config" class="tab-pane">
+                    <div class="config-item">
+                        <div>
+                            <strong>Mostrar Gamificación</strong>
+                            <p>Activa o desactiva la barra superior.</p>
+                        </div>
+                        <label class="switch">
+                            <input type="hidden" id="real-value-show"
+                                value="{{ progreso.mostrar_gamificacion|yesno:'true,false' }}">
+
+                            <input type="checkbox" id="check-show-game" autocomplete="off"
+                                onchange="saveGameSettings()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
+                    <div class="config-item">
+                        <div>
+                            <strong>Ranking Global</strong>
+                            <p>Aparecer en la tabla pública.</p>
+                        </div>
+                        <label class="switch">
+                            <input type="hidden" id="real-value-public"
+                                value="{{ progreso.publico_en_leaderboard|yesno:'true,false' }}">
+
+                            <input type="checkbox" id="check-public-game" autocomplete="off"
+                                onchange="saveGameSettings()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tutorial-overlay" class="tutorial-overlay"></div>
+
+    <div id="tutorial-card" class="tutorial-card">
+        <h3 id="tut-title">Título</h3>
+        <p id="tut-desc">Descripción...</p>
+        <div class="tutorial-controls">
+            <button class="btn-skip" onclick="endTutorial()">Saltar</button>
+            <span id="tut-step" class="step-indicator">1/4</span>
+            <button class="btn-next" onclick="nextStep()">Siguiente</button>
+        </div>
+    </div>
+
+
+    <!-- Theme Logic (Global) -->
+    <script src="{% static 'js/theme.js' %}"></script>
+
+    <script>
+        // --- VARIABLES GLOBALES ---
+        let recognition;
+        let isListening = false;
+        let isSpeaking = false;
+        let silenceTimer;
+        let currentConversationId = null;
+        let typeWriterTimeout;
+        let currentUserBubble = null;
+        let currentBotBubble = null;
+        let currentDrawerBubble = null;
+        let currentConfidence = 0.0; // Global for confidence
+        let currentPronunciationTip = null; // Global for tip
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // Elementos DOM
+        const orb = document.getElementById('magic-orb');
+        const orbIcon = document.getElementById('orb-icon');
+        const liveCaption = document.getElementById('live-caption');
+        const messagesBox = document.getElementById('messages-box');
+        const fullHistoryBox = document.getElementById('full-history-box');
+        const errorsBox = document.getElementById('errors-box');
+        const textInput = document.getElementById('text-input');
+        const btnErrorsToggle = document.getElementById('btn-errors-toggle');
+
+        // --- INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initSpeechRecognition();
+            orb.addEventListener('click', toggleListening);
+
+            // LA LÓGICA DE TEMA AHORA ESTÁ EN theme.js
+            // Se ejecuta automáticamente por el evento DOMContentLoaded de ese archivo
+        });
+
+        // --- MOBILE SIDEBAR TOGGLE ---
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        // --- CONTROL DE DRAWERS ---
+        function toggleHistoryDrawer() {
+            document.getElementById('history-drawer').classList.toggle('open');
+            document.getElementById('errors-drawer').classList.remove('open'); // Close others
+        }
+        function toggleErrorsDrawer() {
+            document.getElementById('errors-drawer').classList.toggle('open');
+            document.getElementById('history-drawer').classList.remove('open'); // Close others
+            // Remove notification if open
+            if (document.getElementById('errors-drawer').classList.contains('open')) {
+                btnErrorsToggle.classList.remove('notification-active');
+            }
+        }
+
+        // --- RECONOCIMIENTO DE VOZ (Web Speech API) ---
+        function initSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Tu navegador no soporta reconocimiento de voz. Usa Chrome.");
+                return;
+            }
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'es-ES';
+
+            recognition.onstart = () => {
+                isListening = true;
+                currentConfidence = 0.0; // Reset confidence
+                orb.classList.add('listening');
+                orbIcon.innerText = 'graphic_eq';
+                liveCaption.innerText = "Escuchando..."; // Restaurado
+                liveCaption.style.display = 'block';
+                const bubbles = createMessageBubble('user', '...', true);
+                currentUserBubble = bubbles.orb;
+                currentDrawerBubble = bubbles.drawer;
+
+                // --- INICIA GRABACIÓN DE AUDIO ---
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.start();
+                        audioChunks = [];
+                        mediaRecorder.ondataavailable = event => {
+                            audioChunks.push(event.data);
+                        };
+                    })
+                    .catch(e => console.error("Error micrófono:", e));
+            };
+
+            recognition.onresult = (event) => {
+                clearTimeout(silenceTimer);
+                // ... (rest is same, no changes needed inside onresult mostly)
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    let chunk = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        currentConfidence = event.results[i][0].confidence;
+                    }
+                    if (transcript.length > 0 && !transcript.endsWith(' ') && !chunk.startsWith(' ')) {
+                        transcript += ' ';
+                    }
+                    transcript += chunk;
+                }
+
+                if (currentUserBubble) {
+                    const bubbleContent = currentUserBubble.querySelector('.bubble');
+                    if (bubbleContent) bubbleContent.textContent = transcript;
+                    messagesBox.scrollTo({ top: messagesBox.scrollHeight, behavior: 'smooth' });
+                }
+                if (currentDrawerBubble) {
+                    const bubbleContent = currentDrawerBubble.querySelector('.bubble');
+                    if (bubbleContent) bubbleContent.textContent = transcript;
+                    fullHistoryBox.scrollTo({ top: fullHistoryBox.scrollHeight, behavior: 'smooth' });
+                }
+
+                silenceTimer = setTimeout(() => {
+                    stopListening();
+                }, 2500);
+            };
+
+            recognition.onend = () => {
+                if (!isSpeaking) {
+                    if (currentUserBubble) {
+                        const bubbleContent = currentUserBubble.querySelector('.bubble');
+                        const text = bubbleContent.textContent;
+
+                        if (text.trim() !== "" && text !== "...") {
+                            // Detener grabación y procesar con Backend
+                            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                                mediaRecorder.stop();
+                                mediaRecorder.onstop = async () => {
+                                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                                    // Procesamos con backend para obtener Score Estricto
+                                    const backendData = await procesarAudioBackend(audioBlob);
+
+                                    // Si el backend da un score, lo usamos (Es más estricto)
+                                    const finalConfidence = backendData ? backendData.confidence : currentConfidence;
+
+                                    // 1. Inyectar Score HTML
+                                    const scoreHtml = getScoreHtml(finalConfidence);
+
+                                    // GESTIÓN DEL BOTÓN FLOTANTE (ESTÁTICO)
+                                    const fab = document.getElementById('btn-pronunciation-help');
+                                    if (finalConfidence < 0.88) {
+                                        // Mostramos el botón flotante
+                                        fab.dataset.text = text;
+                                        fab.style.display = 'flex';
+                                    } else {
+                                        fab.style.display = 'none';
+                                    }
+
+                                    if (scoreHtml) {
+                                        bubbleContent.innerHTML = scoreHtml + text;
+                                    }
+                                    if (currentDrawerBubble) {
+                                        const drawerContent = currentDrawerBubble.querySelector('.bubble');
+                                        if (drawerContent) drawerContent.innerHTML = scoreHtml + text;
+                                    }
+
+                                    // 2. Enviar a cerebro
+                                    processText(text, false, finalConfidence);
+                                };
+                            } else {
+                                // Fallback si no grabó audio
+                                // Fallback si no grabó audio
+                                const scoreHtml = getScoreHtml(currentConfidence);
+
+                                const fab = document.getElementById('btn-pronunciation-help');
+                                if (currentConfidence < 0.85 && currentConfidence > 0) {
+                                    fab.dataset.text = text;
+                                    fab.style.display = 'flex';
+                                } else {
+                                    fab.style.display = 'none';
+                                }
+
+                                if (scoreHtml) bubbleContent.innerHTML = scoreHtml + text;
+                                processText(text, false, currentConfidence);
+                            }
+
+                            currentUserBubble = null;
+                            currentDrawerBubble = null;
+
+                        } else {
+                            currentUserBubble.remove();
+                            if (currentDrawerBubble) currentDrawerBubble.remove();
+                            resetOrb();
+                        }
+                    } else {
+                        resetOrb();
+                    }
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Error STT:", event.error);
+                resetOrb();
+                if (currentUserBubble) currentUserBubble.remove();
+                if (currentDrawerBubble) currentDrawerBubble.remove();
+                liveCaption.innerText = "Error de micrófono.";
+            };
+        }
+
+        function toggleListening() {
+            if (isListening) {
+                stopListening();
+            } else if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                resetOrb();
+            } else {
+                startListening();
+            }
+        }
+
+        function startListening() {
+            // Ocultar botón de ayuda anterior al empezar a hablar
+            document.getElementById('btn-pronunciation-help').style.display = 'none';
+            try {
+                recognition.start();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function stopListening() {
+            recognition.stop();
+        }
+
+        // --- NUEVO: Procesar audio con Backend para Score Estricto ---
+        async function procesarAudioBackend(audioBlob) {
+            try {
+                const reader = new FileReader();
+                return new Promise((resolve, reject) => {
+                    reader.onloadend = async () => {
+                        const base64Audio = reader.result.split(',')[1];
+                        try {
+                            const sttRes = await fetch('/api/stt/', {
+                                method: 'POST',
+                                body: JSON.stringify({ audio_base64: base64Audio }),
+                                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                            });
+                            const sttData = await sttRes.json();
+                            resolve(sttData);
+                        } catch (e) {
+                            console.error("Error Backend STT:", e);
+                            resolve(null);
+                        }
+                    };
+                    reader.readAsDataURL(audioBlob);
+                });
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // --- PROCESAMIENTO ---
+        async function processText(text, createBubble = true, confidence = null) {
+            orb.classList.remove('listening');
+            orb.classList.add('thinking');
+            orbIcon.innerText = 'hourglass_empty';
+            liveCaption.innerText = "Pensando...";
+
+            if (createBubble) {
+                agregarMensaje('user', text, confidence);
+            }
+
+            // Enviamos el confidence capturado (o 1.0 si es nulo)
+            // Asumimos 'es-ES' por defecto o detectado previamente, pero aquí simplificamos a enviar la confianza
+            enviarAlCerebro(text, 'es-ES', confidence !== null ? confidence : 1.0);
+        }
+
+        // Actualiza la firma para aceptar confidence
+        async function enviarAlCerebro(texto, idiomaDetectado = 'es-ES', confidenceScore = 1.0) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+            const bubbles = createMessageBubble('bot', '...', true);
+            currentBotBubble = bubbles.orb;
+            const currentBotDrawerBubble = bubbles.drawer;
+
+            try {
+                const res = await fetch('/chat_interaction/', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        text: texto,
+                        conversation_id: currentConversationId,
+                        detected_lang: idiomaDetectado,
+                        scenario: currentScenario,
+                        confidence: confidenceScore // <--- ENVIAMOS EL PUNTAJE
+                    }),
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+                const data = await res.json();
+                console.log("🔥 SERVER DEBUG > EnviarAlCerebro Data:", data);
+                console.log("🔥 SERVER DEBUG > Tip:", data.tip_pronunciacion);
+
+                if (data.error) {
+                    resetOrb();
+                    liveCaption.innerText = "Error: " + data.error;
+                    if (currentBotBubble) currentBotBubble.remove();
+                    if (currentBotDrawerBubble) currentBotDrawerBubble.remove();
+                    return;
+                }
+
+                // GUARDAMOS EL TIP GLOBALMENTE
+                currentPronunciationTip = data.tip_pronunciacion || null;
+
+                // --- MOSTRAR TIP DE PRONUNCIACIÓN (Coach Panel) ---
+                if (data.tip_pronunciacion) {
+                    mostrarTipPronunciacion(data.tip_pronunciacion);
+
+                    // ACTUALIZAR BOTÓN FLOTANTE CON LA CORRECCIÓN FONÉTICA
+                    const fab = document.getElementById('btn-pronunciation-help');
+                    const correction = data.texto_corregido_fonetico;
+
+                    // FORCE SHOW BUTTON IF IT WAS HIDDEN
+                    fab.style.display = 'flex';
+
+                    // Solo actualizamos si el botón está visible (significa que hubo error)
+                    // O forzamos visibilidad si backend dice que hubo error
+                    if (data.tip_pronunciacion) {
+                        if (correction) {
+                            fab.dataset.correction = correction;
+                        }
+                        fab.dataset.tip = data.tip_pronunciacion;
+                    }
+                }
+
+                if (data.gamification) {
+                    const game = data.gamification;
+
+                    // Animamos el XP
+                    const xpLabel = document.getElementById('stat-xp');
+                    const currentXP = parseInt(xpLabel.innerText); // Leer valor actual
+                    const targetXP = game.xp_actual;
+
+                    // Solo animar la parte numérica, luego agregar " XP"
+                    if (targetXP > currentXP) {
+                        // Truco visual simple: animamos el número y luego concatenamos
+                        xpLabel.innerText = targetXP + " XP"; // O usa animateValue si quieres ser purista
+
+                        // Actualizar también el Hub por si está abierto
+                        document.getElementById('hub-xp').innerText = targetXP;
+                    }
+
+                    // Actualizar Nivel y Racha
+                    document.getElementById('stat-level').innerText = "Nvl " + game.nivel_actual;
+                    document.getElementById('stat-streak').innerText = game.racha_actual;
+                    document.getElementById('hub-level').innerText = game.nivel_actual;
+                    document.getElementById('hub-streak').innerText = game.racha_actual;
+
+                    // Level Up Popup
+                    if (game.subio_nivel) {
+                        document.getElementById('new-level-num').innerText = game.nivel_actual;
+                        document.getElementById('levelup-popup').classList.add('active');
+                    }
+                }
+
+                if (currentConversationId === null && data.conversation_id) {
+                    currentConversationId = data.conversation_id;
+                    agregarChatAlHistorial(data.conversation_id, data.conversation_title || "Nueva Conversación");
+                }
+
+                orb.classList.remove('thinking');
+                orb.classList.add('speaking');
+                orbIcon.innerText = 'volume_up';
+                liveCaption.innerText = "";
+                isSpeaking = true;
+
+                if (data.audio_base64) {
+                    const audio = new Audio("data:audio/mp3;base64," + data.audio_base64);
+
+                    // --- REAL-TIME VISUALIZER HOOK ---
+                    // Try to connect visualizer without breaking flow if error
+                    try {
+                        setupVisualizer(audio);
+                    } catch (err) {
+                        console.error("Visualizer Error:", err);
+                    }
+
+                    audio.play();
+                    audio.onended = () => {
+                        isSpeaking = false;
+                        resetOrb();
+                    };
+                } else {
+                    setTimeout(() => {
+                        isSpeaking = false;
+                        resetOrb();
+                    }, Math.min(data.bot_text.length * 50, 5000));
+                }
+
+                if (currentBotBubble) {
+                    const bubbleContent = currentBotBubble.querySelector('.bubble');
+                    typeWriter(data.bot_text, bubbleContent, currentBotDrawerBubble ? currentBotDrawerBubble.querySelector('.bubble') : null);
+                } else {
+                    agregarMensaje('bot', data.bot_text);
+                }
+
+                if (data.correccion) {
+                    mostrarCorreccion(texto, data.correccion, data.explicacion_regla);
+                    agregarErrorAlDrawer(texto, data.correccion, data.explicacion_regla);
+                }
+
+            } catch (e) {
+                clearTimeout(timeoutId);
+                console.error(e);
+                resetOrb();
+                let errorMsg = "Error en el cerebro.";
+                if (e.name === 'AbortError') {
+                    errorMsg = "El cerebro tardó demasiado.";
+                } else {
+                    errorMsg = "Error de conexión.";
+                }
+                liveCaption.innerText = errorMsg;
+                if (currentBotBubble) currentBotBubble.remove();
+                if (currentBotDrawerBubble) currentBotDrawerBubble.remove();
+            }
+        }
+
+        // Helper para generar HTML del score
+        function getScoreHtml(confidence) {
+            if (confidence === null || confidence === undefined) return '';
+            let colorClass = 'score-low';
+            let label = 'Bajo';
+            if (confidence >= 0.95) { colorClass = 'score-high'; label = 'Nativo'; }
+            else if (confidence >= 0.88) { colorClass = 'score-mid'; label = 'Bien'; }
+
+            return `
+                <span class="score-tooltip" title="Precisión: ${Math.round(confidence * 100)}%">${label}</span>
+                <span class="pronunciation-score ${colorClass}"></span>
+            `;
+        }
+
+        // --- UTILIDADES ---
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function typeWriter(text, element, drawerElement, speed = 30) {
+            clearTimeout(typeWriterTimeout);
+            element.textContent = "";
+            if (drawerElement) drawerElement.textContent = "";
+
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    const char = text.charAt(i);
+                    element.textContent += char;
+                    if (drawerElement) drawerElement.textContent += char;
+                    i++;
+                    typeWriterTimeout = setTimeout(type, speed);
+                    messagesBox.scrollTo({ top: messagesBox.scrollHeight, behavior: 'smooth' });
+                    if (drawerElement) fullHistoryBox.scrollTo({ top: fullHistoryBox.scrollHeight, behavior: 'smooth' });
+                }
+            }
+            type();
+        }
+
+        // --- REAL-TIME AUDIO VISUALIZER ---
+        let audioCtx, analyser, visualizerSource;
+        const BASE_HEIGHTS = [30, 75, 40, 75, 30]; // Matching CSS 'N' shape
+
+        function setupVisualizer(audioElement) {
+            // 1. Init AudioContext on user interaction (first time) or reuse
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // 2. Prepare Analyser
+            if (!analyser) {
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 64; // Low resolution enough for 5 bars
+                analyser.smoothingTimeConstant = 0.5;
+            }
+
+            // 3. Connect Graph
+            // Note: createMediaElementSource can throw if element is already connected.
+            // Since we create 'new Audio()' every time, it's safe.
+            visualizerSource = audioCtx.createMediaElementSource(audioElement);
+            visualizerSource.connect(analyser);
+            analyser.connect(audioCtx.destination);
+
+            // 4. Start Animation Loop
+            drawVisualizer();
+        }
+
+        function drawVisualizer() {
+            if (!isSpeaking) return;
+
+            // Loop
+            requestAnimationFrame(drawVisualizer);
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            const bars = document.querySelectorAll('.sound-wave-container .bar');
+
+            // Map freq data to bars. simple mapping for now.
+            // We use specific indices to capture Bass -> Treble roughly.
+            // With fftSize 64, binCount is 32.
+            // Indices: 0-4 (Bass), 5-10 (Mid), 11-20 (High)
+            const indices = [1, 3, 6, 12, 20];
+
+            bars.forEach((bar, i) => {
+                const val = dataArray[indices[i]] || 0;
+                // Boost factor: 0-255 -> 0-60% height boost
+                const boost = (val / 255) * 60;
+
+                // Final Height = Base + Boost (Max 100%)
+                let finalH = BASE_HEIGHTS[i] + boost;
+                if (finalH > 100) finalH = 100;
+
+                bar.style.height = finalH + '%';
+            });
+        }
+
+        function resetOrb() {
+            orb.classList.remove('listening', 'speaking', 'thinking');
+            orbIcon.innerText = 'mic';
+            liveCaption.innerText = "Haz clic para hablar...";
+            isListening = false;
+            isSpeaking = false;
+
+            // Reset bars to base state explicitly
+            const bars = document.querySelectorAll('.sound-wave-container .bar');
+            bars.forEach((bar, i) => {
+                bar.style.height = BASE_HEIGHTS[i] + '%';
+            });
+        }
+
+        function createMessageBubble(rol, texto, isTransient = true, confidence = null) {
+
+            let scoreHtml = '';
+            // HTML para el botón de ayuda (ya no se genera aquí, es un botón estático)
+            let helpButtonHtml = '';
+
+            console.log(`createMessageBubble - Rol: ${rol}, Conf: ${confidence}, Type: ${typeof confidence}`); // DEBUG
+            // Solo mostramos score si es usuario y tenemos dato
+            if (rol === 'user' && confidence !== null) {
+                // Obtenemos el Score HTML (color y etiqueta)
+                scoreHtml = getScoreHtml(confidence);
+
+                // Si estamos repintando una burbuja histórica, NO tocamos el botón flotante (solo responde al último evento)
+            }
+
+            let orbDiv = null;
+            // Sólo agregar al Orb si es transient (nuevo) O si llamamos explícitamente a esta función para cargar historial reciente
+            // Nota: Para historial cargado, 'isTransient' es false, pero manejaremos la lógica en cargarConversacion
+            if (isTransient) {
+                orbDiv = document.createElement('div');
+                orbDiv.classList.add('message', rol);
+                // Insertamos el scoreHtml antes/después del texto (sin botón)
+                orbDiv.innerHTML = `<div class="bubble">${scoreHtml}${texto}</div>`;
+                messagesBox.appendChild(orbDiv);
+                messagesBox.scrollTo({ top: messagesBox.scrollHeight, behavior: 'smooth' });
+
+                if (messagesBox.children.length > 5) {
+                    messagesBox.removeChild(messagesBox.firstChild);
+                }
+            }
+
+            const drawerDiv = document.createElement('div');
+            drawerDiv.classList.add('message', rol);
+            drawerDiv.innerHTML = `<div class="bubble">${scoreHtml}${texto}${helpButtonHtml}</div>`;
+            fullHistoryBox.appendChild(drawerDiv);
+            fullHistoryBox.scrollTo({ top: fullHistoryBox.scrollHeight, behavior: 'smooth' });
+
+            return { orb: orbDiv, drawer: drawerDiv };
+        }
+
+        function createOrbBubbleOnly(rol, texto) {
+            const orbDiv = document.createElement('div');
+            orbDiv.classList.add('message', rol);
+            orbDiv.innerHTML = `<div class="bubble">${texto}</div>`;
+            messagesBox.appendChild(orbDiv);
+            messagesBox.scrollTo({ top: messagesBox.scrollHeight, behavior: 'smooth' });
+            return orbDiv;
+        }
+
+        function agregarMensaje(rol, texto, confidence = null) {
+            createMessageBubble(rol, texto, true, confidence);
+        }
+
+        function agregarErrorAlDrawer(original, corregido, explicacion) {
+            const errorsBox = document.getElementById('errors-box');
+            // Remove "no errors" message if exists (checked by class)
+            const emptyMsg = errorsBox.querySelector('.no-errors-msg');
+            if (emptyMsg) emptyMsg.remove();
+
+            const errorCard = document.createElement('div');
+            errorCard.classList.add('error-card');
+
+            errorCard.innerHTML = `
+                <div style="font-style:italic; font-size:0.9rem; color:#ccc; margin-bottom:5px;">"${original}"</div>
+                <div style="font-weight:bold; color:#FF5252; margin-bottom:5px;">${corregido}</div>
+                <div style="font-size:0.85rem; color:#bbb;">Explicación: ${explicacion}</div>
+            `;
+            errorsBox.prepend(errorCard);
+
+            // Mostrar notificación en el botón
+            btnErrorsToggle.classList.add('notification-active');
+        }
+
+        function mostrarTipPronunciacion(tip) {
+            const panel = document.getElementById('coach-panel');
+            const card = panel.querySelector('.coach-card');
+
+            // Cambiamos el estilo para que parezca de "Audio/Oído"
+            card.style.borderLeft = "4px solid #FFEA00"; // Amarillo
+
+            panel.querySelector('.coach-title').innerHTML = `
+                <span class="material-icons" style="color:#FFEA00;">hearing</span>
+                Mejora tu Pronunciación
+            `;
+
+            document.getElementById('coach-original').innerHTML = ""; // Limpiamos lo anterior
+            document.getElementById('coach-correction').innerHTML = "";
+
+            // Usamos el espacio de explicación para el tip
+            document.getElementById('coach-explanation').innerHTML = `
+                <div style="font-size:1.1rem; color:#FFF; margin-top:10px;">
+                    ${tip}
+                </div>
+                <div style="font-size:0.8rem; color:#888; margin-top:5px;">
+                    Intenta decirlo de nuevo más despacio.
+                </div>
+            `;
+
+            panel.classList.add('active');
+
+            // Ocultar automáticamente después de 10 segundos
+            setTimeout(() => {
+                panel.classList.remove('active');
+            }, 10000);
+        }
+
+        window.toggleKeyboard = function () {
+            const kbd = document.getElementById('keyboard-area');
+            const input = document.getElementById('text-input');
+            if (kbd.style.display === 'none') {
+                kbd.style.display = 'block';
+                input.focus();
+            } else {
+                kbd.style.display = 'none';
+            }
+        }
+
+        // --- FUNCIONES DE AYUDA FONÉTICA (POPOVER) ---
+        let phraseToPlay = "";
+
+        function mostrarAyudaFonetica(fraseUsuario) {
+            const popover = document.getElementById('pronunciation-popover');
+            const popoverText = document.getElementById('popover-text');
+
+            phraseToPlay = fraseUsuario; // Guardamos la frase para reproducirla
+
+            // Usamos el tip que Gemini nos dio en la última respuesta
+            if (currentPronunciationTip) {
+                popoverText.innerHTML = currentPronunciationTip;
+            } else {
+                popoverText.innerHTML = "No hay un tip específico disponible para esta frase, pero intenta escuchar la pronunciación correcta.";
+            }
+
+            popover.classList.add('visible');
+        }
+
+        function cerrarAyudaFonetica() {
+            document.getElementById('pronunciation-popover').classList.remove('visible');
+        }
+
+        async function reproducirPalabra() {
+            if (!phraseToPlay) return;
+
+            const btn = document.getElementById('play-pronunciation-btn');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<span class="material-icons spinning">sync</span> Cargando...';
+            btn.disabled = true;
+
+            try {
+                // Llamamos a una nueva API para generar el audio de la frase
+                const res = await fetch('/api/tts_word/', {
+                    method: 'POST',
+                    body: JSON.stringify({ text: phraseToPlay, lang: 'en-US' }), // Forzamos inglés
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                });
+                const data = await res.json();
+
+                if (data.audio_base64) {
+                    const audio = new Audio("data:audio/mp3;base64," + data.audio_base64);
+                    audio.play();
+                }
+            } catch (e) {
+                console.error("Error TTS:", e);
+            } finally {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }
+        }
+
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && textInput.value.trim() !== "") {
+                const texto = textInput.value;
+                processText(texto);
+                textInput.value = '';
+                document.getElementById('keyboard-area').style.display = 'none';
+            }
+        });
+
+        // --- GESTIÓN DE CONVERSACIONES ---
+        async function cargarConversacion(id) {
+            currentConversationId = id;
+            document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+            const activeItem = document.getElementById(`chat-item-${id}`);
+            if (activeItem) activeItem.classList.add('active');
+
+            // Limpiar ambos contenedores
+            messagesBox.innerHTML = '';
+            fullHistoryBox.innerHTML = '';
+            errorsBox.innerHTML = '<p style="color:#888; text-align:center;">Cargando errores...</p>';
+
+            try {
+                const response = await fetch(`/api/conversations/${id}/`);
+                const data = await response.json();
+
+                // 1. Mensajes
+                if (data.mensajes) {
+                    const total = data.mensajes.length;
+                    const startOrb = Math.max(0, total - 5); // Últimos 5
+
+                    data.mensajes.forEach((msg, index) => {
+                        const rol = msg.rol === 'usuario' ? 'user' : 'bot';
+
+                        // Añadir SIEMPRE al Drawer
+                        const drawerDiv = document.createElement('div');
+                        drawerDiv.classList.add('message', rol);
+                        drawerDiv.innerHTML = `<div class="bubble">${msg.contenido}</div>`;
+                        fullHistoryBox.appendChild(drawerDiv);
+
+                        // Añadir SOLO al Orb si es de los últimos 5
+                        if (index >= startOrb) {
+                            createOrbBubbleOnly(rol, msg.contenido);
+                        }
+                    });
+                }
+
+                // 2. Errores
+                errorsBox.innerHTML = '';
+                if (data.errores && data.errores.length > 0) {
+                    data.errores.forEach(err => {
+                        agregarErrorAlDrawer(err.original, err.corregido, err.explicacion);
+                    });
+                } else {
+                    errorsBox.innerHTML = '<p class="no-errors-msg" style="color: #666; text-align: center; margin-top: 20px;">No hay errores en esta conversación.</p>';
+                }
+
+            } catch (error) {
+                console.error("Error cargando historial:", error);
+                errorsBox.innerHTML = '<p style="color:#f28b82;">Error al cargar.</p>';
+            }
+        }
+
+        function agregarChatAlHistorial(id, titulo) {
+            const historyBox = document.getElementById('history-box');
+            const emptyMsg = historyBox.querySelector('p');
+            if (emptyMsg) emptyMsg.remove();
+            document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+
+            const newItem = document.createElement('div');
+            newItem.classList.add('history-item', 'active');
+            newItem.id = `chat-item-${id}`;
+            newItem.innerText = titulo;
+            newItem.onclick = () => cargarConversacion(id);
+            historyBox.prepend(newItem);
+        }
+
+        // --- MENÚ DE USUARIO & SETTINGS ---
+        const menuTrigger = document.getElementById('user-menu-trigger');
+        const menuPopup = document.getElementById('user-menu-popup');
+
+        menuTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuPopup.classList.toggle('visible');
+            if (menuPopup.classList.contains('visible')) showSubmenu('view-main');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!menuPopup.contains(e.target) && !menuTrigger.contains(e.target)) {
+                menuPopup.classList.remove('visible');
+            }
+        });
+
+        window.showSubmenu = function (viewId) {
+            document.querySelectorAll('.submenu-view').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        window.loadErrors = async function () {
+            // ... (Función existente para el menú de usuario, no choca con el nuevo drawer)
+            showSubmenu('view-errors');
+            // ... (Resto igual)
+            const container = document.getElementById('errors-list-container');
+            container.innerHTML = '<p style="color:#888; text-align:center;">Cargando...</p>';
+            try {
+                const response = await fetch('/api/settings/errors/');
+                const data = await response.json();
+                container.innerHTML = '';
+                if (data.errores.length === 0) {
+                    container.innerHTML = '<p style="color:#888; font-size:0.8rem;">No hay errores aún.</p>';
+                } else {
+                    data.errores.forEach(err => {
+                        const item = document.createElement('div');
+                        item.className = 'error-item-mini';
+                        item.innerHTML = `<strong>"${err.original}"</strong><span>➡ ${err.corregido}</span>`;
+                        container.appendChild(item);
+                    });
+                }
+            } catch (error) {
+                container.innerHTML = '<p style="color:#f28b82;">Error al cargar.</p>';
+            }
+        }
+
+        window.saveVoiceSettings = async function () {
+            const voice = document.getElementById('setting-voice-code').value;
+            const speed = document.getElementById('setting-speed').value;
+            try {
+                await fetch('/api/settings/voice/', {
+                    method: 'POST',
+                    body: JSON.stringify({ voice_code: voice, speed: speed }),
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                });
+                const status = document.getElementById('save-status');
+                status.style.display = 'block';
+                setTimeout(() => status.style.display = 'none', 2000);
+            } catch (e) { console.error(e); }
+        }
+
+        window.previewVoice = async function () {
+            const voice = document.getElementById('setting-voice-code').value;
+            try {
+                const response = await fetch('/api/settings/preview-voice/', {
+                    method: 'POST',
+                    body: JSON.stringify({ voice_code: voice }),
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                });
+                const data = await response.json();
+                if (data.audio_base64) {
+                    new Audio("data:audio/mp3;base64," + data.audio_base64).play();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function mostrarCorreccion(original, correccion, explicacion) {
+            // Auto-open drawer as requested
+            document.getElementById('errors-drawer').classList.add('open');
+            document.getElementById('history-drawer').classList.remove('open');
+        }
+
+        document.querySelector('.new-chat-btn').addEventListener('click', () => {
+            currentConversationId = null;
+            messagesBox.innerHTML = '';
+            document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+            resetOrb();
+            liveCaption.innerText = "Haz clic para hablar...";
+        });
+
+        function checkSystemAlerts() {
+            fetch('/api/alert/')
+                .then(response => response.json())
+                .then(data => {
+                    const alertBar = document.getElementById('system-alert-bar');
+                    if (data.activa) {
+                        document.getElementById('system-alert-text').innerText = data.mensaje;
+                        alertBar.style.display = 'block';
+                    } else {
+                        alertBar.style.display = 'none';
+                    }
+                })
+                .catch(err => console.log("Error checking alerts", err));
+        }
+
+        // Llamar al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... tus otras inicializaciones ...
+            checkSystemAlerts();
+
+            // Opcional: Revisar cada 60 segundos automáticamente
+            setInterval(checkSystemAlerts, 60000);
+        });
+
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    obj.innerHTML = end; // Asegurar valor final
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function openGameHub() {
+            document.getElementById('game-hub-overlay').classList.add('visible');
+            loadLeaderboard(); // Cargar ranking al abrir
+        }
+
+        function closeGameHub() {
+            document.getElementById('game-hub-overlay').classList.remove('visible');
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+            // Activar seleccionada
+            document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        async function loadLeaderboard() {
+            const tbody = document.getElementById('leaderboard-body');
+            try {
+                const res = await fetch('/api/leaderboard/');
+                const data = await res.json();
+
+                tbody.innerHTML = '';
+                data.leaderboard.forEach((p, index) => {
+                    const tr = document.createElement('tr');
+                    if (p.es_yo) tr.classList.add('is-me');
+
+                    let medal = '';
+                    if (index === 0) medal = '🥇 ';
+                    if (index === 1) medal = '🥈 ';
+                    if (index === 2) medal = '🥉 ';
+
+                    tr.innerHTML = `
+                    <td>${medal}${index + 1}</td>
+                    <td style="font-weight:bold; color:white;">${p.username}</td>
+                    <td>Nvl ${p.nivel}</td>
+                    <td style="color:#BB86FC;">${p.xp} XP</td>
+                `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function saveGameSettings() {
+            // 1. Leer el estado ACTUAL visual de los botones
+            const showGameElem = document.getElementById('check-show-game');
+            const publicGameElem = document.getElementById('check-public-game');
+
+            const showGame = showGameElem.checked;
+            const publicGame = publicGameElem.checked;
+
+            console.log("Guardando configuración:", { mostrar: showGame, publico: publicGame });
+
+            // 2. Aplicar cambio visual a la barra INMEDIATAMENTE
+            const bar = document.getElementById('gamification-bar');
+            if (bar) {
+                bar.style.display = showGame ? 'flex' : 'none';
+            }
+
+            // 3. Enviar al servidor
+            try {
+                const response = await fetch('/api/settings/game/', {
+                    method: 'POST',
+                    body: JSON.stringify({ mostrar: showGame, publico: publicGame }),
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                });
+
+                if (!response.ok) {
+                    console.error("Error en servidor al guardar.");
+                }
+            } catch (e) {
+                console.error("Error de conexión:", e);
+            }
+        }
+
+        // Función para obtener cookies (CSRF)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // 1. Obtener los valores reales de la BD (texto "true" o "false")
+            const valShow = document.getElementById('real-value-show').value;
+            const valPublic = document.getElementById('real-value-public').value;
+
+            console.log("Valores BD recuperados:", valShow, valPublic);
+
+            // 2. Obtener los checkboxes visuales
+            const checkShow = document.getElementById('check-show-game');
+            const checkPublic = document.getElementById('check-public-game');
+
+            // 3. FORZAR EL ESTADO (Convertir string a boolean)
+            checkShow.checked = (valShow === "true");
+            checkPublic.checked = (valPublic === "true");
+
+            // 4. Aplicar visualmente la barra superior si es necesario
+            const bar = document.getElementById('gamification-bar');
+            if (bar) {
+                bar.style.display = checkShow.checked ? 'flex' : 'none';
+            }
+        });
+
+        async function procesarAudio(audioBlob) {
+            // ... (FileReader igual) ...
+            reader.onloadend = async () => {
+                const base64Audio = reader.result.split(',')[1];
+
+                try {
+                    // 1. STT (Ahora devuelve detected_lang)
+                    const sttRes = await fetch('/api/stt/', {
+                        method: 'POST',
+                        body: JSON.stringify({ audio_base64: base64Audio }),
+                        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                    });
+                    const sttData = await sttRes.json();
+
+                    if (sttData.transcript) {
+                        console.log("STT Data received:", sttData); // DEBUG
+                        liveCaption.innerText = sttData.transcript;
+                        agregarMensaje('user', sttData.transcript, sttData.confidence);
+
+                        // 2. ENVIAR AL CEREBRO CON EL IDIOMA DETECTADO
+                        // Importante: pasamos detected_lang y confidence
+                        console.log(`DEBUG STT FRONTEND: Text="${sttData.transcript}", Lang=${sttData.detected_lang}, Conf=${sttData.confidence}`);
+                        enviarAlCerebro(sttData.transcript, sttData.detected_lang, sttData.confidence);
+                    }
+                    // ...
+                } catch (e) { resetOrb(); }
+            };
+        }
+
+        // --- VARIABLES GLOBALES ---
+        let currentScenario = 'general'; // Por defecto
+
+        // --- LÓGICA DE ESCENARIOS ---
+        function openScenarioHub() {
+            document.getElementById('scenario-hub-overlay').classList.add('visible');
+        }
+
+        function closeScenarioHub() {
+            document.getElementById('scenario-hub-overlay').classList.remove('visible');
+        }
+
+        function selectScenario(scenarioId, icon, text, cardElement) {
+            // 1. Actualizar variable global
+            currentScenario = scenarioId;
+
+            // 2. Actualizar UI del selector principal
+            document.getElementById('current-scenario-icon').innerText = icon;
+            document.getElementById('current-scenario-text').innerText = text;
+
+            // 3. Actualizar estado visual de las tarjetas
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
+            cardElement.classList.add('active');
+
+            // 4. Cerrar modal
+            closeScenarioHub();
+
+            // 5. Opcional: Enviar mensaje de sistema al chat para avisar el cambio
+            agregarMensaje('bot', `🎭 Modo cambiado a: ${text}. ¡Empecemos!`);
+
+            // 6. Resetear orbe para dar feedback visual
+            orb.style.borderColor = scenarioId === 'general' ? '' : '#FF9800'; // Naranja si es roleplay
+        }
+
+        // Actualiza la firma de la función enviarAlCerebro
+
+
+        // --- EXPOSE FUNCTIONS TO WINDOW (Fix for inline onclicks) ---
+        window.mostrarAyudaFonetica = function (fraseUsuario) {
+            console.log("mostrarAyudaFonetica called with:", fraseUsuario); // DEBUG
+            const popover = document.getElementById('pronunciation-popover');
+            const popoverText = document.getElementById('popover-text');
+            const fab = document.getElementById('btn-pronunciation-help');
+
+            // Check for correction
+            const correction = fab.dataset.correction;
+
+            if (correction) {
+                phraseToPlay = correction; // Play the CORRECTED version
+                popoverText.innerHTML = `
+                    <div style="margin-bottom: 5px; color: #FFEA00; font-style: italic;">¿Quisiste decir: "${correction}"?</div>
+                    ${currentPronunciationTip || "Escucha la diferencia."}
+                `;
+            } else {
+                phraseToPlay = fraseUsuario;
+                if (currentPronunciationTip) {
+                    popoverText.innerHTML = currentPronunciationTip;
+                } else {
+                    popoverText.innerHTML = "Tu pronunciación fue detectada como <b>Correcta</b>.<br>El sistema no generó correcciones.";
+                }
+            }
+
+            popover.classList.add('visible');
+            // Move popover to ensure z-index is respected
+            document.body.appendChild(popover);
+        };
+
+        // --- PRONUNCIATION DRAWER LOGIC ---
+        function togglePronunciationDrawer() {
+            const drawer = document.getElementById('pronunciation-drawer');
+            const isOpen = drawer.classList.contains('open');
+
+            // Close others
+            document.getElementById('history-drawer').classList.remove('open');
+            document.getElementById('errors-drawer').classList.remove('open');
+
+            if (!isOpen) {
+                drawer.classList.add('open');
+                loadPronunciationErrors();
+            } else {
+                drawer.classList.remove('open');
+            }
+        }
+
+        async function loadPronunciationErrors() {
+            const box = document.getElementById('pronunciation-box');
+            if (!currentConversationId) {
+                box.innerHTML = '<p class="no-errors-msg">Selecciona un chat primero.</p>';
+                return;
+            }
+            box.innerHTML = '<p class="loading-msg">Cargando...</p>';
+
+            try {
+                // Change: Pass conversation_id
+                const res = await fetch(`/api/pronunciation-errors/?conversation_id=${currentConversationId}`);
+                const data = await res.json();
+                console.log("🔥 SERVER DEBUG > LoadPronunciationErrors Data:", data);
+
+                // Change: data.errors instead of data.errores
+                if (data.errors && data.errors.length > 0) {
+                    box.innerHTML = '';
+                    data.errors.forEach(err => {
+                        const item = document.createElement('div');
+                        item.className = 'error-card';
+                        item.style.borderLeft = '4px solid #CF6679';
+
+                        const scorePct = Math.round(err.confidence * 100);
+
+                        item.innerHTML = `
+                            <div class="error-header" style="justify-content: space-between;">
+                                <span style="font-size: 0.8rem; color: #999;">${err.timestamp}</span>
+                                <span class="score-badge" style="background: #CF6679; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">${scorePct}%</span>
+                            </div>
+                            <div class="error-original" style="text-decoration: none;">"${err.texto_original}"</div>
+                            ${err.texto_corregido_fonetico ? `<div class="error-correction" style="color: #FFEA00;">Intento: "${err.texto_corregido_fonetico}"</div>` : ''}
+                            <div class="error-explanation" style="margin-top: 5px;">${err.tip_fonetico}</div>
+                        `;
+                        box.appendChild(item);
+                    });
+                } else {
+                    box.innerHTML = '<p class="no-errors-msg">No hay historial de pronunciación en este chat.</p>';
+                }
+            } catch (e) {
+                console.error(e);
+                box.innerHTML = '<p class="error-msg">Error al cargar historial.</p>';
+            }
+        }
+
+
+        window.cerrarAyudaFonetica = function () {
+            console.log("cerrarAyudaFonetica called");
+            document.getElementById('pronunciation-popover').classList.remove('visible');
+        };
+
+        window.reproducirPalabra = async function () {
+            if (!phraseToPlay) {
+                console.warn("reproducirPalabra: No phrase to play");
+                return;
+            }
+
+            const btn = document.getElementById('play-pronunciation-btn');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<span class="material-icons spinning">sync</span> Cargando...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/tts_word/', {
+                    method: 'POST',
+                    body: JSON.stringify({ text: phraseToPlay, lang: 'en-US' }),
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                });
+                const data = await res.json();
+
+                if (data.audio_base64) {
+                    const audio = new Audio("data:audio/mp3;base64," + data.audio_base64);
+                    audio.play();
+                }
+            } catch (e) {
+                console.error("Error TTS:", e);
+            } finally {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }
+        };
+
+        // --- GLOBAL EVENT DELEGATION (Robust Fix) ---
+        document.addEventListener('click', function (e) {
+            // Buscamos el botón (o su hijo icon)
+            const btn = e.target.closest('.pronunciation-help-btn');
+            if (btn) {
+                console.log("Global delegate clicked:", btn);
+                const text = btn.dataset.text;
+                if (text) {
+                    window.mostrarAyudaFonetica(text);
+                } else {
+                    console.warn("Button has no data-text!");
+                }
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
+
+        async function deleteChat(event, chatId) {
+            // 1. Evitar que el clic se propague al div padre (que carga el chat)
+            event.stopPropagation();
+
+            // 2. Confirmación
+            if (!confirm("¿Estás seguro de que quieres eliminar este chat? No se puede deshacer.")) {
+                return;
+            }
+
+            try {
+                // 3. Petición al Backend
+                const response = await fetch(`/chat/delete/${chatId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                if (response.ok) {
+                    // 4. Si se borró bien, lo quitamos visualmente con una animación
+                    const item = document.getElementById(`chat-item-${chatId}`);
+                    item.style.opacity = '0';
+                    setTimeout(() => item.remove(), 300); // Esperar a que desvanezca
+
+                    // Si estábamos viendo ese chat, limpiar la pantalla
+                    if (currentConversationId === chatId) {
+                        messagesBox.innerHTML = '';
+                        currentConversationId = null;
+                        resetOrb();
+                        // Opcional: mostrar mensaje de bienvenida
+                        liveCaption.innerText = "Haz clic en el orbe para hablar...";
+                    }
+                } else {
+                    alert("Error al eliminar el chat.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        const tourSteps = [
+            {
+                elementId: 'magic-orb',
+                title: 'El Orbe Mágico',
+                desc: 'Este es el corazón de Naza. Haz clic aquí para empezar a hablar. El orbe cambiará de color cuando te esté escuchando o respondiendo.'
+            },
+            {
+                elementId: 'gamification-bar',
+                title: 'Tu Progreso',
+                desc: 'Aquí verás tu Nivel, Experiencia (XP) y Racha de días. ¡Haz clic en la barra para ver el Ranking Global y tus estadísticas detalladas!'
+            },
+            {
+                // OJO: Asegúrate de que el div del selector de escenario tenga ID "scenario-selector-btn"
+                // Si no lo tiene, agrégalo en el HTML del paso anterior: <div class="scenario-selector" id="scenario-selector-btn"...
+                elementId: 'scenario-selector-btn',
+                title: 'Modo de Práctica',
+                desc: '¿No sabes de qué hablar? Elige un "Rol" aquí (como Cafetería o Entrevista) y Naza actuará ese personaje.'
+            },
+            {
+                elementId: 'user-menu-trigger', // El footer del sidebar
+                title: 'Tu Perfil y Configuración',
+                desc: 'Aquí puedes cambiar la voz del bot, ver tu historial de errores completo, descargar reportes PDF o volver a ver este tutorial.'
+            }
+        ];
+
+        let currentStepIndex = 0;
+
+        function startTutorial() {
+            // Cerrar menús si están abiertos
+            document.getElementById('user-menu-popup').classList.remove('visible');
+
+            currentStepIndex = 0;
+            document.getElementById('tutorial-overlay').classList.add('active');
+            showStep(currentStepIndex);
+        }
+
+        function showStep(index) {
+            const step = tourSteps[index];
+            const target = document.getElementById(step.elementId);
+            const card = document.getElementById('tutorial-card');
+
+            // 1. Quitar resaltado anterior
+            document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+
+            if (!target) {
+                console.error("Elemento no encontrado:", step.elementId);
+                // Si falla un paso, intentamos el siguiente en lugar de abortar
+                currentStepIndex++;
+                if (currentStepIndex < tourSteps.length) {
+                    showStep(currentStepIndex);
+                } else {
+                    endTutorial();
+                }
+                return;
+            }
+
+            // 1.5. FORZAR VISIBILIDAD SI ESTÁ OCULTO
+            // Si el estilo display es none, lo mostramos temporalmente para el tutorial
+            const style = window.getComputedStyle(target);
+            if (style.display === 'none') {
+                target.style.display = 'flex'; // Asumimos flex para la barra, block para otros
+                // Marcamos para ocultar luego si queremos ser puristas, 
+                // pero dejarlo visible es mejor UX para que vea la feature.
+            }
+
+            // 2. Resaltar nuevo objetivo
+            target.classList.add('tutorial-highlight');
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Asegurar que se ve
+
+            // 3. Llenar info
+            document.getElementById('tut-title').innerText = step.title;
+            document.getElementById('tut-desc').innerText = step.desc;
+            document.getElementById('tut-step').innerText = `${index + 1}/${tourSteps.length}`;
+
+            // 4. Posicionar la tarjeta cerca del elemento
+            // Pequeño delay para asegurar que el renderizado se actualizó si estaba oculto
+            setTimeout(() => {
+                const rect = target.getBoundingClientRect();
+                const cardWidth = 300;
+                const cardHeight = 200;
+
+                // Lógica de posicionamiento mejorada
+                let top = rect.bottom + 15; // Por defecto abajo
+                let left = rect.left + (rect.width / 2) - (cardWidth / 2); // Centrado horizontal
+
+                // Si se sale por abajo, poner arriba
+                if (top + cardHeight > window.innerHeight) {
+                    top = rect.top - cardHeight - 15;
+                }
+
+                // Si se sale por la izquierda o derecha, ajustar
+                if (left < 10) left = 10;
+                if (left + cardWidth > window.innerWidth) {
+                    left = window.innerWidth - cardWidth - 10;
+                }
+
+                card.style.top = `${top}px`;
+                card.style.left = `${left}px`;
+                card.style.display = 'block';
+            }, 100);
+        }
+
+        function nextStep() {
+            currentStepIndex++;
+            if (currentStepIndex < tourSteps.length) {
+                showStep(currentStepIndex);
+            } else {
+                endTutorial();
+                // Marcar que ya lo vio (opcional para el futuro)
+                localStorage.setItem('tutorial_seen', 'true');
+            }
+        }
+
+        function endTutorial() {
+            document.getElementById('tutorial-overlay').classList.remove('active');
+            document.getElementById('tutorial-card').style.display = 'none';
+            document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+        }
+
+        // AUTO-INICIO (Opcional): Si es la primera vez que entra en este navegador
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('tutorial_seen')) {
+                // Esperar un poco a que cargue todo visualmente
+                setTimeout(startTutorial, 1000);
+            }
+        });
+
+    </script>
+
+    <!-- UI COMPONENTS (Moved inside body) -->
+    <div id="system-alert-bar"
+        style="display: none; background-color: #BB86FC; color: black; padding: 10px; text-align: center; font-weight: bold; position: fixed; top: 0; left: 0; width: 100%; z-index: 3000; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+        <span class="material-icons" style="vertical-align: middle; font-size: 1.2rem; margin-right: 5px;">info</span>
+        <span id="system-alert-text">Mensaje del sistema...</span>
+        <button onclick="document.getElementById('system-alert-bar').style.display='none'"
+            style="background:none; border:none; float:right; cursor:pointer; font-weight:bold; font-size:1.2rem;">&times;</button>
+    </div>
+
+    <!-- Coach Panel -->
+    <div id="coach-panel" class="coach-panel">
+        <div class="coach-card">
+            <div class="coach-title">
+                <span class="material-icons">school</span>
+                Tip de Aprendizaje
+            </div>
+            <div id="coach-original" style="font-style:italic; font-size:0.9rem; color:#ccc; margin-bottom:5px;"></div>
+            <div id="coach-correction" style="font-weight:bold; color:#fff; margin-bottom:5px;"></div>
+            <div id="coach-explanation" style="font-size:0.85rem; color:#bbb;"></div>
+        </div>
+    </div>
+
+    <!-- Popover de Pronunciación -->
+    <div id="pronunciation-popover" class="pronunciation-popover">
+        <button class="close-popover" onclick="window.cerrarAyudaFonetica()">&times;</button>
+        <div class="popover-content">
+            <h3><span class="material-icons" style="color:#FFEA00; vertical-align:middle;">lightbulb</span> Tip de
+                Pronunciación</h3>
+            <p id="popover-text">Cargando...</p>
+            <button id="play-pronunciation-btn" class="play-btn" onclick="window.reproducirPalabra()">
+                <span class="material-icons">volume_up</span> Escuchar
+            </button>
+        </div>
+    </div>
+</body>
+
+</html>
+```

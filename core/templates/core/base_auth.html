@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naza Bot - Acceso</title>
+    <style>
+        /* RESET BÁSICO */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #121212;
+            /* Fondo NEGRO de la página */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* LA TARJETA CENTRAL */
+        .login-card {
+            background-color: #E6E6E6;
+            /* GRIS CLARO: Coincide con el fondo de tu logo */
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        /* EL LOGO */
+        .logo-img {
+            width: 200px;
+            /* Tamaño controlado */
+            height: auto;
+            display: block;
+            margin: 0 auto 20px auto;
+            /* El truco: mix-blend-mode ayuda a fusionar el gris del logo con el fondo */
+            /* mix-blend-mode: multiply; */
+        }
+
+        /* TIPOGRAFÍA */
+        h2 {
+            color: #000;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* FORMULARIOS */
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #999;
+            background: #fff;
+            border-radius: 4px;
+            font-size: 1rem;
+            color: #000;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #000;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* BOTÓN */
+        button {
+            width: 100%;
+            background-color: #000;
+            color: #fff;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        /* LINKS */
+        .footer-text {
+            margin-top: 20px;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        a {
+            color: #000;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Ocultar textos de ayuda de Django */
+        .helptext,
+        ul.errorlist {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-card">
+        <img src="{% static 'img/naza_logo_v2.png' %}" alt="NAZA Logo" class="logo-img">
+
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</body>
+
+</html>

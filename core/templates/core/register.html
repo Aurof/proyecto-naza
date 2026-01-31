@@ -1,0 +1,369 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuenta | Naza Bot</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --primary: #BB86FC;
+            --secondary: #03DAC6;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --text-main: #FFFFFF;
+            --text-muted: #A0A0A0;
+            --error: #CF6679;
+            --visual-bg: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #FFFFFF;
+            --primary: #6200EE;
+            --secondary: #03DAC6;
+            --input-bg: #F1F3F4;
+            --text-main: #202124;
+            --text-muted: #5F6368;
+            --error: #B00020;
+            --visual-bg: radial-gradient(circle at center, #F5F7FA 0%, #E0E0E0 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            /* Main container handles scroll */
+            display: flex;
+        }
+
+        /* --- LEFT SIDE (VISUAL) --- */
+        .visual-panel {
+            flex: 1;
+            position: relative;
+            position: relative;
+            background: var(--visual-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Orb Animation (Copied from Landing/Chat) */
+        .orb {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff, #BB86FC 60%, #000);
+            box-shadow: 0 0 60px #BB86FC, inset 0 0 20px #fff;
+            position: relative;
+            z-index: 10;
+            margin-bottom: 40px;
+            animation: pulseOrb 4s infinite ease-in-out;
+        }
+
+        .orb::after {
+            content: '';
+            position: absolute;
+            top: -30px;
+            left: -30px;
+            right: -30px;
+            bottom: -30px;
+            border-radius: 50%;
+            border: 1px solid rgba(187, 134, 252, 0.3);
+            animation: spin 15s linear infinite;
+        }
+
+        @keyframes pulseOrb {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 60px #BB86FC;
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 100px #BB86FC, 0 0 20px #03DAC6;
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .welcome-text {
+            text-align: center;
+            z-index: 10;
+            max-width: 80%;
+        }
+
+        .welcome-text h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-text p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Bg decorations */
+        .bg-glow {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(187, 134, 252, 0.1) 0%, transparent 60%);
+            animation: rotateBG 20s linear infinite;
+        }
+
+        @keyframes rotateBG {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+
+        /* --- RIGHT SIDE (FORM) --- */
+        .form-panel {
+            flex: 1;
+            max-width: 600px;
+            background: #050505;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            /* SCROLL FIX */
+            padding: 40px;
+            position: relative;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 40px;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover {
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+
+        /* --- FORM STYLES --- */
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ddd;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(187, 134, 252, 0.05);
+            box-shadow: 0 0 0 4px rgba(187, 134, 252, 0.1);
+        }
+
+        .helptext {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+            display: block;
+            line-height: 1.4;
+        }
+
+        .error-msg {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* --- BUTTON --- */
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary), #7c4dff);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 10px 30px rgba(124, 77, 255, 0.2);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(124, 77, 255, 0.4);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--text-muted);
+        }
+
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        /* --- MOBILE RESPONSIVE --- */
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+                height: auto;
+                overflow-y: auto;
+            }
+
+            .visual-panel {
+                height: 300px;
+                /* Header style on mobile */
+                flex: none;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .orb {
+                width: 120px;
+                height: 120px;
+                margin-bottom: 20px;
+            }
+
+            .welcome-text h1 {
+                font-size: 2rem;
+            }
+
+            .form-panel {
+                flex: none;
+                width: 100%;
+                max-width: 100%;
+                overflow: visible;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Left Side: Visual Experience -->
+    <div class="visual-panel">
+        <div class="bg-glow"></div>
+
+        <div class="orb"></div>
+
+        <div class="welcome-text">
+            <h1>Únete a Naza</h1>
+            <p>La revolución en el aprendizaje de idiomas<br>comienza contigo.</p>
+        </div>
+    </div>
+
+    <!-- Right Side: Interaction -->
+    <div class="form-panel">
+        <a href="{% url 'landing' %}" class="btn-back">
+            <span class="material-icons">arrow_back</span> Volver al inicio
+        </a>
+
+        <div class="auth-container">
+            <h2>Crear Cuenta</h2>
+            <p class="subtitle">Completa tus datos para comenzar tu entrenamiento.</p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+
+                    {% if field.help_text %}
+                    <small class="helptext">{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                    <div class="error-msg">
+                        <span class="material-icons" style="font-size:16px">error_outline</span>
+                        {{ error }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="btn-submit">Registrarse</button>
+            </form>
+
+            <div class="login-link">
+                ¿Ya tienes una cuenta? <a href="{% url 'login' %}">Iniciar Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/theme.js' %}"></script>
+</body>
+
+</html>

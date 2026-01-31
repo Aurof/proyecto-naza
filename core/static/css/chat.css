@@ -1,0 +1,1856 @@
+/* --- VARIABLES GLOBALES (THEMING SYSTEM) --- */
+:root {
+    /* DARK MODE (Default - Premium Black) */
+    --bg-dark: #050505;
+    /* Was #121212 */
+    --bg-panel: #141414;
+    /* Was #1E1E1E */
+    --border: #333;
+    --accent: #BB86FC;
+    --text-main: #FFFFFF;
+    --text-muted: #A0A0A0;
+    --user-bubble: #1F1F1F;
+    --bot-bubble: #2A2A2A;
+    --error-bg: #CF6679;
+    --input-bg: #1A1A1A;
+    --hover-bg: #2C2C2C;
+    --shadow: rgba(0, 0, 0, 0.7);
+    --invert-icon: 1;
+    /* White logo */
+    --sidebar-bg: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] {
+    /* LIGHT MODE (Clean White) */
+    --bg-dark: #F5F7FA;
+    --bg-panel: #FFFFFF;
+    --border: #DDD;
+    /* DARKER BORDER for visibility */
+    --accent: #6200EE;
+    /* Deep Purple for contrast */
+    --text-main: #202124;
+    --text-muted: #444;
+    /* DARKER TEXT for visibility */
+    --user-bubble: #E8E8E8;
+    --bot-bubble: #FFFFFF;
+    --error-bg: #B00020;
+    --input-bg: #FFFFFF;
+    --hover-bg: #E0E0E0;
+    --shadow: rgba(0, 0, 0, 0.1);
+    --invert-icon: 0;
+    /* Black logo */
+    --sidebar-bg: rgba(255, 255, 255, 0.6);
+    /* Semi-transparent white */
+    /* Semi-transparent white */
+}
+
+/* --- SCROLLBAR CUSTOMIZATION --- */
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-muted);
+}
+
+/* --- MENÚ FLOTANTE DE USUARIO (Estilo Gemini) --- */
+.user-menu-popup {
+    position: absolute;
+    bottom: 80px;
+    /* Justo encima del footer del usuario */
+    left: 10px;
+    width: 280px;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px var(--shadow);
+    display: none;
+    /* Oculto por defecto */
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.user-menu-popup.visible {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Cabecera del menú */
+.menu-header {
+    padding: 15px;
+    border-bottom: 1px solid #3c4043;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--hover-bg);
+}
+
+.menu-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-main);
+}
+
+.menu-header p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Cuerpo del menú (Donde cambia el contenido) */
+.menu-body {
+    padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Botones de Navegación del Menú */
+.menu-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.menu-btn:hover {
+    background-color: var(--hover-bg);
+}
+
+.menu-btn.logout {
+    color: #f28b82;
+}
+
+/* Rojo suave */
+
+/* --- SUB-VISTAS (Configuración y Errores) --- */
+.submenu-view {
+    display: none;
+}
+
+.submenu-view.active {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+
+/* Estilos para el form de voz dentro del menú */
+.voice-form label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 10px;
+}
+
+.voice-form select,
+.voice-form input {
+    width: 100%;
+    padding: 8px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+.btn-back {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 5px 0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+/* Estilos para la lista de errores */
+.error-item-mini {
+    background-color: var(--bg-panel);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border-left: 3px solid var(--error-bg);
+    font-size: 0.85rem;
+}
+
+.error-item-mini strong {
+    display: block;
+    color: var(--error-bg);
+    margin-bottom: 2px;
+}
+
+.error-item-mini span {
+    color: var(--text-muted);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* --- LAYOUT GENERAL (Movido de chat.html) --- */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    /* BACKGROUND UNIFICADO EN BODY (Gradient Global) */
+    background-color: var(--bg-dark);
+    /* Fondo adaptativo (el mismo que tenía orb-container) */
+    background-image: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+/* --- SIDEBAR IZQUIERDA (Historial) --- */
+.sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    /* Sutilmente distinto */
+    border-right: 1px solid var(--border);
+    /* Borde visible */
+    backdrop-filter: blur(10px);
+    /* Efecto cristal opcional */
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    transition: 0.3s;
+}
+
+.logo-area {
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.logo-mini {
+    width: 30px;
+    height: auto;
+    /* Invert filter: 1 for Dark (Image is black -> becomes white), 0 for Light (Image is black -> stays black) */
+    /* filter: invert(var(--invert-icon)); */
+}
+
+.new-chat-btn {
+    background-color: var(--text-main);
+    color: var(--bg-dark);
+    border: none;
+    padding: 12px;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 20px;
+    transition: 0.2s;
+}
+
+.new-chat-btn:hover {
+    opacity: 0.9;
+}
+
+.history-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.history-item {
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-main);
+    /* Full Contrast */
+    opacity: 1;
+    /* Removed opacity reduction */
+    font-weight: 500;
+    /* Thicker text */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: 0.2s;
+}
+
+.history-item:hover {
+    background-color: var(--hover-bg);
+    color: var(--text-main);
+}
+
+.history-item.active {
+    background-color: var(--hover-bg);
+    color: var(--text-main);
+    border-left: 3px solid var(--accent);
+}
+
+.user-footer {
+    border-top: 1px solid var(--border);
+    padding-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* --- ÁREA CENTRAL (Chat) --- */
+.chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-bottom: 100px;
+}
+
+.message {
+    display: flex;
+    gap: 15px;
+    max-width: 80%;
+}
+
+.message.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.message.bot .avatar {
+    background-color: var(--accent);
+    color: #000;
+}
+
+.bubble {
+    padding: 15px;
+    border-radius: 12px;
+    line-height: 1.5;
+    position: relative;
+}
+
+.message.user .bubble {
+    background-color: var(--user-bubble);
+    border-bottom-right-radius: 2px;
+}
+
+.message.bot .bubble {
+    background-color: var(--bot-bubble);
+    border-bottom-left-radius: 2px;
+}
+
+.error-marker {
+    text-decoration: underline wavy var(--error-bg);
+    cursor: help;
+}
+
+/* Input Flotante */
+.input-container {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    max-width: 700px;
+    background-color: var(--bg-panel);
+    border-radius: 50px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border);
+}
+
+.input-box {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #FFF;
+    padding: 10px 15px;
+    font-size: 1rem;
+    outline: none;
+}
+
+.mic-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--bg-dark);
+    color: #FFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.mic-btn.recording {
+    background-color: var(--error-bg);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(207, 102, 121, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(207, 102, 121, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(207, 102, 121, 0);
+    }
+}
+
+/* Notification Pulse for Button */
+.notification-active {
+    animation: errorPulse 2s infinite;
+    position: relative;
+}
+
+.notification-active::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background-color: var(--error-bg);
+    border-radius: 50%;
+    border: 2px solid #333;
+}
+
+@keyframes errorPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(207, 102, 121, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(207, 102, 121, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(207, 102, 121, 0);
+    }
+}
+
+a {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+a:hover {
+    color: #FFF;
+}
+
+/* --- ORBE CENTRAL (RENOVADO 3D) --- */
+.orb-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* Fondo transparente porque ahora lo maneja el body */
+    background: transparent;
+}
+
+/* El círculo mágico 3D */
+.orb {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    /* Nuevo estilo 3D (Landing Style) */
+    background: radial-gradient(circle at 30% 30%, #fff, #BB86FC 60%, #000);
+    box-shadow: 0 0 60px #BB86FC, inset 0 0 20px #fff;
+    position: relative;
+    z-index: 10;
+    cursor: pointer;
+
+    /* Estado Base: Flotando */
+    transform: translateY(-40px) scale(1);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s, box-shadow 0.3s;
+
+    /* Animación continua */
+    animation: pulseOrb 4s infinite ease-in-out;
+}
+
+/* Anillo giratorio (Pseudo-elemento) */
+.orb::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    border-radius: 50%;
+    border: 1px solid rgba(187, 134, 252, 0.3);
+    animation: spin 10s linear infinite;
+    pointer-events: none;
+}
+
+/* Icono (OCULTO - Solicitud de Usuario) */
+.orb .material-icons {
+    display: none !important;
+}
+
+/* --- ANIMACIONES KEYFRAMES --- */
+@keyframes pulseOrb {
+
+    0%,
+    100% {
+        box-shadow: 0 0 60px #BB86FC;
+    }
+
+    50% {
+        box-shadow: 0 0 100px #BB86FC, 0 0 20px #03DAC6;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- ESTADOS INTERACTIVOS --- */
+
+/* 1. ESCUCHANDO (Click) -> ROJO + PEQUEÑO */
+.orb.listening {
+    /* Cambio a Rojo */
+    background: radial-gradient(circle at 30% 30%, #fff, #CF6679 60%, #000);
+    box-shadow: 0 0 80px #CF6679, inset 0 0 20px #fff;
+
+    /* Shrink visualmente manteniendo la posición */
+    transform: translateY(-40px) scale(0.9);
+}
+
+.orb.listening::after {
+    border-color: rgba(207, 102, 121, 0.5);
+    animation-duration: 2s;
+    /* Girar más rápido */
+}
+
+/* 2. HABLANDO (Bot responde) -> Mantener estilo base, quizás más brillo */
+.orb.speaking {
+    animation: pulseOrb 1s infinite ease-in-out;
+    /* Pulso rápido */
+}
+
+.chat-messages {
+    position: absolute;
+    top: 70%;
+    /* Start lower */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    max-width: 600px;
+    height: auto;
+    max-height: 250px;
+    /* Limit height */
+    background: transparent;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /* Messages start from top */
+    mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 100%);
+    pointer-events: none;
+    /* Allow clicks through */
+    z-index: 5;
+}
+
+.message {
+    background: transparent !important;
+    box-shadow: none !important;
+    margin-bottom: 10px;
+    opacity: 0;
+    animation: fadeInMsg 0.5s forwards;
+    pointer-events: none;
+}
+
+.message.bot .bubble {
+    background: rgba(0, 0, 0, 0.6);
+    border-left: 3px solid #03DAC6;
+    color: #03DAC6;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.message.user .bubble {
+    background: rgba(0, 0, 0, 0.6);
+    border-right: 3px solid #CF6679;
+    color: #E0E0E0;
+    text-align: right;
+    font-style: italic;
+}
+
+@keyframes fadeInMsg {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Ocultar input viejo */
+.input-container {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    bottom: 20px;
+    pointer-events: none;
+}
+
+.input-box {
+    display: none;
+}
+
+/* Ocultamos el teclado, solo voz (o botón opcional) */
+.mic-btn {
+    display: none;
+}
+
+/* El orbe es el botón ahora */
+
+/* Texto en tiempo real (Stream) */
+#live-caption {
+    position: absolute;
+    top: 20%;
+    width: 80%;
+    text-align: center;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 300;
+    min-height: 40px;
+    pointer-events: none;
+    /* Crucial: Allow clicks through */
+    z-index: 5;
+}
+
+/* --- PANEL DESLIZANTE (DRAWER) --- */
+.history-drawer,
+.errors-drawer,
+#pronunciation-drawer {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    /* Oculto a la derecha */
+    width: 350px;
+    height: 100vh;
+    background-color: var(--bg-panel);
+    border-left: 1px solid var(--border);
+    color: var(--text-main);
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+    transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 2000;
+    /* Por encima de todo */
+    display: flex;
+    flex-direction: column;
+}
+
+.history-drawer.open,
+.errors-drawer.open {
+    right: 0;
+    /* Visible */
+}
+
+/* Specific styling for error drawer items if needed */
+.error-card {
+    background-color: var(--bg-panel);
+    border-left: 3px solid var(--error-bg);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.error-card strong {
+    color: var(--error-bg);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.error-card span {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+
+.drawer-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.drawer-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-main);
+}
+
+.drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* --- ESTILOS DE BURBUJAS DENTRO DEL DRAWER (Restauración) --- */
+/* Sobrescribimos los estilos "invisibles" del Orbe para que aquí se vean normales */
+
+#full-history-box .message {
+    opacity: 1 !important;
+    animation: none !important;
+    pointer-events: auto !important;
+    background: transparent !important;
+    display: flex;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+#full-history-box .message.user {
+    justify-content: flex-end;
+}
+
+#full-history-box .message.bot {
+    justify-content: flex-start;
+}
+
+#full-history-box .bubble {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    text-align: left !important;
+    /* Forzar alineación izquierda texto */
+    border: none !important;
+    /* Quitar bordes de neón del orbe */
+}
+
+/* Colores sólidos para lectura cómoda */
+#full-history-box .message.user .bubble {
+    background-color: #2C2C2C !important;
+    color: #E0E0E0 !important;
+    border-bottom-right-radius: 2px;
+}
+
+#full-history-box .message.bot .bubble {
+    background-color: #383838 !important;
+    color: #E0E0E0 !important;
+    /* Texto blanco normal, no verde neón */
+    border-bottom-left-radius: 2px;
+}
+
+/* --- GAMIFICACIÓN --- */
+.gamification-bar {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    z-index: 100;
+}
+
+.stat-pill {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 15px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #333;
+    font-weight: bold;
+    font-size: 0.9rem;
+    backdrop-filter: blur(5px);
+}
+
+/* Animación de Subida de Nivel */
+.levelup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 5000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s;
+}
+
+.levelup-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.levelup-card {
+    background: #1E1E1E;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    border: 2px solid #FFD700;
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.levelup-overlay.active .levelup-card {
+    transform: scale(1);
+}
+
+.levelup-card button {
+    background: #FFD700;
+    color: black;
+    border: none;
+    padding: 10px 30px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+/* --- GAME HUB MODAL --- */
+.game-hub-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 4000;
+    display: flex;
+    /* Keep flex for centering */
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    opacity: 0;
+    pointer-events: none;
+    /* Crucial: Allow clicks through when invisible */
+    transition: opacity 0.3s;
+}
+
+.game-hub-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+    /* Enable clicks when visible */
+}
+
+.game-hub-card {
+    background: #1E1E1E;
+    width: 500px;
+    border-radius: 16px;
+    border: 1px solid #333;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 50px rgba(187, 134, 252, 0.2);
+    transform: scale(0.9);
+    transition: transform 0.3s;
+}
+
+.game-hub-overlay.visible .game-hub-card {
+    transform: scale(1);
+}
+
+.btn-close-hub {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Header & Tabs */
+.hub-header {
+    background: #252525;
+    padding: 20px 20px 0 20px;
+    text-align: center;
+}
+
+.hub-header h2 {
+    margin: 0 0 20px 0;
+    color: #FFF;
+}
+
+.hub-tabs {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    color: #888;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    font-weight: bold;
+}
+
+.tab-btn.active {
+    color: #BB86FC;
+    border-bottom-color: #BB86FC;
+}
+
+/* Content */
+.hub-content {
+    padding: 30px;
+    min-height: 300px;
+}
+
+.tab-pane {
+    display: none;
+    animation: fadeIn 0.3s;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* Stats Grid */
+.big-stats-grid {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.big-stat-box h3 {
+    font-size: 2.5rem;
+    margin: 10px 0;
+    color: white;
+}
+
+.big-stat-box p {
+    color: #888;
+    margin: 0;
+}
+
+/* Leaderboard Table */
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.leaderboard-table th {
+    text-align: left;
+    color: #888;
+    padding: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.leaderboard-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #222;
+}
+
+.leaderboard-table tr.is-me {
+    background: rgba(187, 134, 252, 0.1);
+    border-left: 3px solid #BB86FC;
+}
+
+/* Toggles / Switches */
+.config-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    gap: 20px;
+}
+
+.config-item strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #eee;
+}
+
+.config-item p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #333;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked+.slider {
+    background-color: #BB86FC;
+}
+
+input:checked+.slider:before {
+    transform: translateX(24px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* --- SCENARIO SELECTOR --- */
+.scenario-selector {
+    position: absolute;
+    top: 80px;
+    /* Debajo de la barra de gamificación */
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid #444;
+    padding: 8px 15px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #ccc;
+    transition: 0.2s;
+    backdrop-filter: blur(5px);
+    z-index: 50;
+}
+
+.scenario-selector:hover {
+    background: rgba(50, 50, 50, 0.9);
+    border-color: #BB86FC;
+    color: white;
+}
+
+/* Role Cards */
+.role-card {
+    background: #252525;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: 0.2s;
+}
+
+.role-card:hover {
+    background: #333;
+    transform: translateY(-2px);
+}
+
+.role-card.active {
+    border-color: #BB86FC;
+    background: rgba(187, 134, 252, 0.1);
+}
+
+.role-card small {
+    display: block;
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.role-card .material-icons {
+    font-size: 2rem;
+}
+
+/* Indicador de Pronunciación */
+.pronunciation-score {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.score-high {
+    background-color: #00E676;
+    box-shadow: 0 0 8px #00E676;
+}
+
+/* Verde */
+.score-mid {
+    background-color: #FFEA00;
+    box-shadow: 0 0 8px #FFEA00;
+}
+
+/* Amarillo */
+.score-low {
+    background-color: #FF3D00;
+    box-shadow: 0 0 8px #FF3D00;
+}
+
+/* Rojo */
+
+.score-tooltip {
+    font-size: 0.7rem;
+    color: #888;
+    font-style: normal;
+    margin-right: 5px;
+}
+
+/* COACH PANEL / TIPS */
+.coach-panel {
+    position: fixed;
+    top: 80px;
+    /* Debajo de la barra superior */
+    right: 20px;
+    width: 300px;
+    z-index: 1000;
+    pointer-events: none;
+    /* Dejar pasar clics si está oculto */
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    transform: translateX(20px);
+}
+
+.coach-panel.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+}
+
+.coach-card {
+    background: #1F1F1F;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    border: 1px solid #333;
+    border-left: 4px solid #BB86FC;
+    /* Color por defecto */
+    color: white;
+}
+
+.coach-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Botón de ayuda de pronunciación */
+.pronunciation-help-btn {
+    background-color: #CF6679;
+    /* Rojo */
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    vertical-align: middle;
+    pointer-events: auto;
+    /* Re-enable clicks because parent .message has pointer-events: none */
+}
+
+.pronunciation-help-btn:hover {
+    transform: scale(1.1);
+    background-color: #E57373;
+}
+
+.pronunciation-help-btn .material-icons {
+    font-size: 16px;
+}
+
+/* Popover flotante */
+.pronunciation-popover {
+    position: fixed;
+    bottom: 100px;
+    /* Ajusta según la posición de tu orbe */
+    left: 50%;
+    transform: translateX(-50%);
+    background: #252525;
+    border: 2px solid #CF6679;
+    /* Borde rojo */
+    border-radius: 12px;
+    padding: 20px;
+    width: 300px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: none;
+    /* Oculto por defecto */
+    animation: slideUp 0.3s ease-out;
+}
+
+.pronunciation-popover.visible {
+    display: block;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+.popover-content h3 {
+    margin: 0 0 15px 0;
+    color: white;
+    font-size: 1.1rem;
+}
+
+.popover-content p {
+    color: #ccc;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.close-popover {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.play-btn {
+    background: #BB86FC;
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 15px;
+}
+
+.play-btn:hover {
+    background: #a370db;
+}
+
+/* Modificamos el item para usar Flexbox */
+.history-item {
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #AAA;
+    /* Flexbox para separar texto y botón */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.history-item:hover {
+    background-color: #2A2A2A;
+    color: #FFF;
+}
+
+.history-item.active {
+    background-color: #333;
+    color: #FFF;
+}
+
+/* El texto debe ocupar el espacio disponible y cortarse si es muy largo */
+.chat-title-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    /* Ocupa todo el espacio posible */
+    margin-right: 10px;
+}
+
+/* El botón de borrar */
+.delete-chat-btn {
+    background: transparent;
+    border: none;
+    color: #CF6679;
+    /* Rojo suave */
+    cursor: pointer;
+    opacity: 0;
+    /* INVISIBLE POR DEFECTO */
+    transition: opacity 0.2s, transform 0.2s;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-chat-btn:hover {
+    background-color: rgba(207, 102, 121, 0.1);
+    transform: scale(1.1);
+}
+
+/* TRUCO: Cuando pasas el mouse sobre el item, el botón se vuelve visible */
+.history-item:hover .delete-chat-btn {
+    opacity: 1;
+}
+
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tutorial-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Clase para elevar el elemento resaltado por encima del fondo oscuro */
+.tutorial-highlight {
+    position: relative;
+    z-index: 9001 !important;
+    box-shadow: 0 0 0 5px #BB86FC, 0 0 50px rgba(0, 0, 0, 0.5);
+    background-color: #1e1e1e;
+    transition: all 0.3s;
+    pointer-events: none;
+}
+
+/* Fix específico para la barra de gamificación que es absoluta */
+/* Fix específico para la barra de gamificación que es absoluta */
+.gamification-bar.tutorial-highlight {
+    position: absolute !important;
+    background-color: transparent !important;
+    /* Evitar fondo gris cuadrado */
+    box-shadow: 0 0 0 5px #BB86FC !important;
+    /* Mantener solo el anillo */
+    z-index: 2147483647 !important;
+}
+
+/* Fix específico para el selector de roles (también absoluto) */
+.scenario-selector.tutorial-highlight {
+    position: absolute !important;
+    background-color: #1e1e1e !important;
+    /* Fondo solido para resaltar texto */
+    box-shadow: 0 0 0 5px #BB86FC, 0 0 40px rgba(187, 134, 252, 1) !important;
+    /* Anillo + Glow Intenso */
+    z-index: 2147483647 !important;
+    border: 2px solid #BB86FC !important;
+    transform: scale(1.05);
+    /* Zoom para destacar */
+}
+
+/* La tarjeta con la explicación */
+.tutorial-card {
+    position: fixed;
+    background: #252525;
+    border: 1px solid #BB86FC;
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 300px;
+    z-index: 9002;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    display: none;
+}
+
+.tutorial-card h3 {
+    margin: 0 0 10px 0;
+    color: #BB86FC;
+    font-size: 1.1rem;
+}
+
+.tutorial-card p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.tutorial-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.step-indicator {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.btn-next {
+    background: #BB86FC;
+    color: black;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-skip {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+
+/* --- RESPONSIVE MOBILE OPTIMIZATION --- */
+/* --- RESPONSIVE MOBILE OPTIMIZATION --- */
+@media screen and (max-width: 768px) {
+
+    /* 1. Sidebar Off-canvas */
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        bottom: 0;
+        width: 80%;
+        max-width: 300px;
+        z-index: 3000;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    /* Overlay */
+    #sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 2900;
+        display: none;
+        backdrop-filter: blur(2px);
+    }
+
+    #sidebar-overlay.active {
+        display: block;
+    }
+
+    /* 2. Main Layout Adjustment - Fix Scroll Issue & Gaps */
+    .orb-container {
+        width: 100vw;
+        /* Force full viewport width */
+        height: 100dvh;
+        padding-top: 60px;
+        padding-bottom: env(safe-area-inset-bottom);
+        box-sizing: border-box;
+        margin: 0;
+        overflow-x: hidden;
+        /* Prevent horizontal scroll inside */
+    }
+
+    body {
+        display: block;
+        /* Disable flex layout on mobile to prevent gaps */
+        width: 100vw;
+        height: 100dvh;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Prevent global scroll */
+}
+
+/* 3. Gamification Bar */
+.gamification-bar {
+    top: 10px;
+    width: 90%;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    position: absolute;
+    /* Ensure it stays at top */
+    display: flex;
+}
+
+.stat-pill {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-main);
+    box-shadow: 0 2px 5px var(--shadow);
+}
+
+.pill-icon {
+    font-size: 1.1rem;
+    color: var(--accent);
+}
+
+/* 4. Scenario Selector */
+.scenario-selector {
+    position: absolute;
+    top: 65px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px var(--shadow);
+    transition: 0.2s;
+    z-index: 100;
+}
+
+.scenario-selector:hover {
+    transform: translateX(-50%);
+}
+
+/* 5. Mobile Menu Button */
+/* 5. Mobile Menu Button */
+#mobile-menu-btn {
+    display: none;
+    /* Oculto por defecto en Desktop */
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 2800;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #444;
+    color: white;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* 6. Orb & Live Caption */
+.orb {
+    width: 120px;
+    height: 120px;
+    /* Mobile Position */
+    transform: translateY(-50px) scale(1);
+}
+
+/* Override for Mobile Listening State */
+.orb.listening {
+    /* Encogimiento relativo a la posición móvil */
+    transform: translateY(-50px) scale(0.9) !important;
+}
+
+.orb .material-icons {
+    font-size: 3rem;
+}
+
+#live-caption {
+    top: 15%;
+    font-size: 1.2rem;
+    padding: 0 20px;
+}
+
+/* 7. Chat Messages Area */
+.chat-messages {
+    width: 100%;
+    /* Was 95%, changed to 100% to fill width minus padding */
+    top: 58%;
+    height: auto;
+    max-height: 35vh;
+    padding-right: 80px;
+    /* Space for FABs */
+    padding-left: 15px;
+    box-sizing: border-box;
+    /* Crucial for padding to work */
+}
+
+.message {
+    max-width: 100%;
+}
+
+.bubble {
+    padding: 10px;
+    font-size: 0.95rem;
+}
+
+/* 9. Drawers - DEFENSIVELY SCOPED (MOBILE ONLY) */
+@media screen and (max-width: 768px) {
+
+    .history-drawer,
+    .errors-drawer,
+    #pronunciation-drawer {
+        width: 100%;
+        right: -100%;
+        height: 100dvh;
+        z-index: 4000 !important;
+    }
+
+    /* Show hamburger on mobile */
+    #mobile-menu-btn {
+        display: flex !important;
+    }
+}
+
+/* END MOBILE QUERY */
+
+/* --- FLOATING ACTION BUTTONS (GLOBAL) --- */
+.fab-container {
+    padding-bottom: 20px;
+    z-index: 1500;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.fab-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background-color: var(--bg-panel);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px var(--shadow);
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.fab-btn:hover {
+    transform: scale(1.1);
+    background-color: var(--hover-bg);
+    color: var(--text-main);
+}
+
+.fab-help {
+    background-color: var(--error-bg);
+    /* Orejita siempre roja/roja pastel */
+    color: #FFF;
+    border: none;
+    display: none;
+    /* JS toggles this */
+    animation: pulse 2s infinite;
+}
+
+.fab-btn.fab-red {
+    color: var(--error-bg);
+}
+
+/* Mobile-specific FAB tweaks */
+
+/* Mobile-specific FAB tweaks */
+@media screen and (max-width: 768px) {
+    .fab-container {
+        bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+        right: 15px !important;
+        gap: 8px !important;
+    }
+}
+
+/* --- DESKTOP SAFEGUARD --- */
+@media screen and (min-width: 769px) {
+
+    .history-drawer,
+    .errors-drawer,
+    #pronunciation-drawer {
+        width: 350px !important;
+        position: fixed;
+        right: -400px;
+        top: 0;
+        height: 100vh;
+        z-index: 2000 !important;
+        box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+        border-left: 1px solid #333;
+        transition: right 0.3s ease;
+    }
+
+    .history-drawer.open,
+    .errors-drawer.open,
+    #pronunciation-drawer.open {
+        right: 0 !important;
+    }
+
+    body {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .orb-container {
+        width: 100%;
+        height: 100vh;
+    }
+}
+
+/* --- ESTILOS DEL POPOVER DE PRONUNCIACIÓN (Agregado) --- */
+.pronunciation-popover {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--bg-panel);
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 12px;
+    z-index: 10000;
+    /* Muy alto para estar sobre todo */
+    width: 90%;
+    max-width: 400px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.pronunciation-popover.visible {
+    display: flex;
+    animation: fadeIn 0.3s;
+}
+
+.close-popover {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.play-btn {
+    margin-top: 15px;
+    background: var(--accent);
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    transition: transform 0.2s;
+}
+
+.play-btn:hover {
+    transform: scale(1.05);
+}

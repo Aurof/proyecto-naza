@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Verificar Cuenta | Naza Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --primary: #BB86FC;
+            --secondary: #03DAC6;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --text-main: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: #1a1a1a;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        p {
+            margin-bottom: 30px;
+            color: #aaa;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            background: var(--input-bg);
+            color: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .error {
+            color: #CF6679;
+            margin-bottom: 15px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <h2>Verifica tu Correo</h2>
+        <p>Hemos enviado un código al correo: <br><strong>{{ email }}</strong></p>
+
+        {% if error %}
+        <span class="error">{{ error }}</span>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="codigo" placeholder="000000" maxlength="6" required autofocus>
+            <button type="submit">Validar</button>
+        </form>
+    </div>
+
+</body>
+
+</html>

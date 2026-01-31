@@ -1,0 +1,246 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Admin - Naza Bot</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #121212;
+            color: #E0E0E0;
+            display: flex;
+        }
+
+        /* Sidebar Admin */
+        .sidebar {
+            width: 250px;
+            background-color: #1E1E1E;
+            border-right: 1px solid #333;
+            height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 40px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .logo-mini {
+            width: 30px;
+            /* mix-blend-mode: multiply; */
+            filter: invert(1);
+        }
+
+        .nav-item {
+            padding: 15px;
+            border-radius: 8px;
+            color: #888;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            transition: 0.2s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background-color: #333;
+            color: #BB86FC;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        h2 {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .kpi-card {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .kpi-info h3 {
+            margin: 0;
+            font-size: 2rem;
+            color: #FFF;
+        }
+
+        .kpi-info p {
+            margin: 0;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .kpi-icon {
+            font-size: 2.5rem;
+            color: #BB86FC;
+            opacity: 0.8;
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-container {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+
+        h4 {
+            margin-top: 0;
+            color: #ccc;
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="logo-area">
+            <img src="{% static 'img/naza_logo_v2.png' %}" class="logo-mini">
+            <span>Naza Admin</span>
+        </div>
+
+        <a href="#" class="nav-item active">
+            <span class="material-icons">dashboard</span> General
+        </a>
+        <a href="{% url 'admin_users_list' %}" class="nav-item">
+            <span class="material-icons">people</span> Usuarios
+        </a>
+        <a href="{% url 'admin_audit' %}" class="nav-item">
+            <span class="material-icons">gavel</span> Auditoría IA
+        </a>
+
+        <a href="{% url 'admin_broadcast' %}" class="nav-item">
+            <span class="material-icons">campaign</span> Broadcast
+        </a>
+        <a href="{% url 'home' %}" class="nav-item">
+            <span class="material-icons">chat</span> Volver al Chat
+        </a>
+        <a href="{% url 'logout' %}" class="nav-item" style="margin-top: auto; color: #CF6679;">
+            <span class="material-icons">logout</span> Salir
+        </a>
+    </aside>
+
+    <main class="main">
+        <h2>Panel de Control - Métricas de Tesis</h2>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-info">
+                    <h3>{{ total_usuarios }}</h3>
+                    <p>Usuarios Registrados</p>
+                </div>
+                <span class="material-icons kpi-icon">group</span>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-info">
+                    <h3>{{ total_conversaciones }}</h3>
+                    <p>Sesiones de Chat</p>
+                </div>
+                <span class="material-icons kpi-icon">forum</span>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-info">
+                    <h3 style="color: #CF6679;">{{ total_errores }}</h3>
+                    <p>Errores Corregidos</p>
+                </div>
+                <span class="material-icons kpi-icon" style="color: #CF6679;">gpp_bad</span>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h4>Errores Gramaticales (Tendencia)</h4>
+                <canvas id="errorsChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h4>Top Usuarios Activos</h4>
+                <canvas id="usersChart"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Configuración común para modo oscuro
+        Chart.defaults.color = '#888';
+        Chart.defaults.borderColor = '#333';
+
+        // 1. Gráfica de Errores (Line Chart)
+        const ctxErrors = document.getElementById('errorsChart').getContext('2d');
+        new Chart(ctxErrors, {
+            type: 'line',
+            data: {
+                labels: {{ chart_fechas| safe }},
+            datasets: [{
+                label: 'Errores Detectados',
+                data: {{ chart_errores| safe }},
+            borderColor: '#CF6679',
+            backgroundColor: 'rgba(207, 102, 121, 0.2)',
+            fill: true,
+            tension: 0.4
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        // 2. Gráfica de Usuarios (Bar Chart)
+        const ctxUsers = document.getElementById('usersChart').getContext('2d');
+        new Chart(ctxUsers, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_users_labels| safe }},
+            datasets: [{
+                label: 'Mensajes Enviados',
+                data: {{ chart_users_data| safe }},
+            backgroundColor: '#BB86FC',
+            borderRadius: 5
+                }]
+            },
+            options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
+        }
+        });
+    </script>
+</body>
+
+</html>

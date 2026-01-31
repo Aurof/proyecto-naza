@@ -1,0 +1,16 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__
+db.sqlite3
+/media
+/static
+
+# Environment
+.env
+/venv
+/env
+
+# Google Cloud Keys
+tts-test-*.json

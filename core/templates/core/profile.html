@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil - Naza Bot</title>
+    <link rel="stylesheet" href="{% static 'css/chat.css' %}">
+    <style>
+        .profile-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .profile-card {
+            background-color: var(--bg-panel);
+            padding: 40px;
+            border-radius: 12px;
+            width: 400px;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        h2 {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        select,
+        input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .btn-save {
+            background-color: var(--accent);
+            color: #000;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="profile-container">
+        <div class="profile-card">
+            <h2>Configuración de Voz</h2>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Selecciona la Voz:</label>
+                    {{ form.voice_code_tts }}
+                </div>
+
+                <div class="form-group">
+                    <label>Velocidad del Habla (0.5x - 1.5x):</label>
+                    {{ form.velocidad }}
+                    <div style="text-align: right; font-size: 0.8rem; color: #aaa;">Normal: 1.0</div>
+                </div>
+
+                <button type="submit" class="btn-save">Guardar Cambios</button>
+            </form>
+
+            <a href="{% url 'home' %}" class="back-link">Volver al Chat</a>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,270 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Auditoría IA - Naza Admin</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #121212;
+            color: #E0E0E0;
+            display: flex;
+        }
+
+        /* Sidebar Logo Styles */
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .logo-mini {
+            width: 30px;
+            /* mix-blend-mode: multiply; */
+            /* filter: invert(1); */
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1E1E1E;
+            border-right: 1px solid #333;
+            height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        /* Barra de búsqueda */
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #1E1E1E;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .btn-search {
+            background: #BB86FC;
+            color: black;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid #333;
+            color: #888;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #222;
+            vertical-align: top;
+        }
+
+        tr:hover {
+            background-color: #1E1E1E;
+        }
+
+        /* Badges */
+        .role-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .role-user {
+            background: #333;
+            color: #ccc;
+            border: 1px solid #555;
+        }
+
+        .role-bot {
+            background: #004d40;
+            color: #03DAC6;
+            border: 1px solid #00695c;
+        }
+
+        /* Highlight de Error */
+        .error-row {
+            background-color: rgba(207, 102, 121, 0.05);
+        }
+
+        .error-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background-color: #CF6679;
+            color: black;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 10px;
+            text-decoration: none;
+        }
+
+        .error-tag:hover {
+            opacity: 0.9;
+        }
+
+        .nav-item {
+            padding: 15px;
+            color: #888;
+            text-decoration: none;
+            display: flex;
+            gap: 10px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .nav-item.active {
+            background-color: #333;
+            color: #BB86FC;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo-area">
+            <img src="{% static 'img/naza_logo_v2.png' %}" class="logo-mini">
+            <span>Naza Admin</span>
+        </div>
+
+        <a href="{% url 'admin_dashboard' %}" class="nav-item">
+            <span class="material-icons">dashboard</span> General
+        </a>
+        <a href="{% url 'admin_users_list' %}" class="nav-item">
+            <span class="material-icons">people</span> Usuarios
+        </a>
+        <a href="#" class="nav-item active">
+            <span class="material-icons">gavel</span> Auditoría IA
+        </a>
+
+        <a href="{% url 'admin_broadcast' %}" class="nav-item">
+            <span class="material-icons">campaign</span> Broadcast
+        </a>
+        <a href="{% url 'home' %}" class="nav-item">
+            <span class="material-icons">chat</span> Volver al Chat
+        </a>
+        <a href="{% url 'logout' %}" class="nav-item" style="margin-top: auto; color: #CF6679;">
+            <span class="material-icons">logout</span> Salir
+        </a>
+    </aside>
+
+    <main class="main">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h2 style="margin: 0;">Auditoría de IA</h2>
+                <p style="color:#666; margin: 5px 0 0 0;">Supervisión de calidad y detección de anomalías.</p>
+            </div>
+            <div style="text-align: right; color: #888; font-size: 0.9rem;">
+                Mostrando últimos {{ mensajes|length }} registros
+            </div>
+        </div>
+
+        <form method="get" class="search-bar">
+            <span class="material-icons" style="color:#666;">search</span>
+            <input type="text" name="q" class="search-input"
+                placeholder="Buscar por palabra clave, grosería o usuario..." value="{{ query }}">
+            <button type="submit" class="btn-search">Filtrar</button>
+            {% if query %}
+            <a href="{% url 'admin_audit' %}"
+                style="color: #CF6679; align-self: center; text-decoration: none; font-size: 0.9rem; margin-left: 10px;">Limpiar</a>
+            {% endif %}
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th width="12%">Hora</th>
+                    <th width="15%">Usuario / Chat</th>
+                    <th width="10%">Emisor</th>
+                    <th>Contenido del Mensaje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in mensajes %}
+                <tr class="{% if m.has_error %}error-row{% endif %}">
+
+                    <td style="color:#666; font-family: monospace;">{{ m.timestamp|date:"d/m H:i" }}</td>
+
+                    <td>
+                        <div style="font-weight: bold; color: #E0E0E0;">{{ m.conversacion.usuario.username }}</div>
+                        <div style="font-size: 0.75rem; color: #888;">Chat ID: {{ m.conversacion.id_conversacion }}
+                        </div>
+                    </td>
+
+                    <td>
+                        {% if m.rol == 'usuario' %}
+                        <span class="role-badge role-user">User</span>
+                        {% else %}
+                        <span class="role-badge role-bot">AI Bot</span>
+                        {% endif %}
+                    </td>
+
+                    <td style="color: #ccc; line-height: 1.4;">
+                        {{ m.contenido_texto|truncatechars:120 }}
+
+                        {% if m.has_error %}
+                        <a href="{% url 'admin_user_detail' m.conversacion.usuario.id %}" class="error-tag"
+                            title="Ver detalle del error">
+                            <span class="material-icons" style="font-size: 14px;">warning</span>
+                            CORRECCIÓN ACTIVADA
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 40px; color: #666;">
+                        No se encontraron resultados para tu búsqueda.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+
+</html>

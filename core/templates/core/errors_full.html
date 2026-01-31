@@ -1,0 +1,208 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Errores - Naza Bot</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/chat.css' %}">
+    <style>
+        /* Estilos específicos para la tabla de errores */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background-color: var(--bg-dark);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+        }
+
+        .page-header h2 {
+            margin: 0;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .errors-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            /* Espacio entre filas */
+            color: var(--text-main);
+        }
+
+        .errors-table th {
+            text-align: left;
+            padding: 15px;
+            color: #9aa0a6;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .errors-table td {
+            padding: 20px;
+            background-color: var(--bg-panel);
+            vertical-align: top;
+        }
+
+        .errors-table tr td:first-child {
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+
+        .errors-table tr td:last-child {
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .errors-table tr:hover td {
+            background-color: #252525;
+            transition: background-color 0.2s;
+        }
+
+        .bad-text {
+            color: var(--error-bg);
+            text-decoration: line-through;
+            opacity: 0.8;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .good-text {
+            color: #81C995;
+            font-weight: bold;
+            display: block;
+        }
+
+        .chat-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background-color: rgba(187, 134, 252, 0.1);
+            border-radius: 20px;
+            transition: 0.2s;
+        }
+
+        .chat-link:hover {
+            background-color: rgba(187, 134, 252, 0.2);
+            text-decoration: none;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            margin-top: 80px;
+            color: #666;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            color: #333;
+            background: #1E1E1E;
+            padding: 30px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="logo-area">
+            <img src="{% static 'img/naza_logo_v2.png' %}" class="logo-mini">
+            <span>Naza Bot</span>
+        </div>
+
+        <a href="{% url 'home' %}" class="new-chat-btn" style="text-decoration:none;">
+            <span class="material-icons">chat</span> Volver al Chat
+        </a>
+
+        <div class="history-list">
+            <p style="padding:10px; color:#666; font-size:0.8rem;">Chats recientes:</p>
+            {% for chat in chats %}
+            <div class="history-item">{{ chat.titulo }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="user-footer">
+            <span style="color:#888;">{{ request.user.username }}</span>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h2>Historial de Correcciones</h2>
+                <span style="color:#888;">Total: {{ errores|length }} errores detectados</span>
+            </div>
+
+            <a href="{% url 'export_pdf' %}" target="_blank"
+                style="background-color: #CF6679; color: black; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                <span class="material-icons">picture_as_pdf</span> Descargar PDF
+            </a>
+        </div>
+
+        {% if errores %}
+        <table class="errors-table">
+            <thead>
+                <tr>
+                    <th width="15%">Fecha</th>
+                    <th width="20%">Conversación</th>
+                    <th width="30%">Corrección</th>
+                    <th width="35%">Explicación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for error in errores %}
+                <tr>
+                    <td style="color:#888; font-size: 0.9rem;">{{ error.timestamp|date:"d M, H:i" }}</td>
+                    <td>
+                        <a href="#" class="chat-link">
+                            <span class="material-icons" style="font-size:16px;">forum</span>
+                            {{ error.mensaje.conversacion.titulo }}
+                        </a>
+                    </td>
+                    <td>
+                        <span class="bad-text">{{ error.texto_original }}</span>
+                        <span class="good-text">{{ error.texto_corregido }}</span>
+                    </td>
+                    <td style="font-size:0.95rem; line-height: 1.5; color: #ccc;">
+                        {{ error.explicacion_regla }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <span class="material-icons empty-icon">check_circle</span>
+            <div>
+                <h3 style="margin:0; color: #E0E0E0;">¡Impecable!</h3>
+                <p style="margin-top:10px;">No has cometido errores gramaticales todavía.</p>
+            </div>
+        </div>
+        {% endif %}
+    </main>
+
+</body>
+
+</html>

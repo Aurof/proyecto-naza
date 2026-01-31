@@ -1,0 +1,221 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Usuarios - Naza Admin</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* Estilos base iguales al Dashboard */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #121212;
+            color: #E0E0E0;
+            display: flex;
+        }
+
+        /* Sidebar Logo Styles */
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .logo-mini {
+            width: 30px;
+            /* mix-blend-mode: multiply; */
+            /* filter: invert(1); */
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1E1E1E;
+            border-right: 1px solid #333;
+            height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        /* Estilos de Tabla de Gestión */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 2px solid #BB86FC;
+            color: #BB86FC;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        tr:hover {
+            background-color: #252525;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .badge-admin {
+            background-color: #BB86FC;
+            color: black;
+        }
+
+        .badge-user {
+            background-color: #333;
+            color: #ccc;
+        }
+
+        .btn-action {
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .btn-action:hover {
+            background-color: #444;
+        }
+
+        .nav-item {
+            padding: 15px;
+            color: #888;
+            text-decoration: none;
+            display: flex;
+            gap: 10px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .nav-item.active {
+            background-color: #333;
+            color: #BB86FC;
+        }
+
+        .nav-item:hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo-area">
+            <img src="{% static 'img/naza_logo_v2.png' %}" class="logo-mini">
+            <span>Naza Admin</span>
+        </div>
+
+        <a href="{% url 'admin_dashboard' %}" class="nav-item">
+            <span class="material-icons">dashboard</span> General
+        </a>
+        <a href="#" class="nav-item active">
+            <span class="material-icons">people</span> Usuarios
+        </a>
+        <a href="{% url 'admin_audit' %}" class="nav-item">
+            <span class="material-icons">gavel</span> Auditoría IA
+        </a>
+
+        <a href="{% url 'admin_broadcast' %}" class="nav-item">
+            <span class="material-icons">campaign</span> Broadcast
+        </a>
+        <a href="{% url 'home' %}" class="nav-item">
+            <span class="material-icons">chat</span> Volver al Chat
+        </a>
+        <a href="{% url 'logout' %}" class="nav-item" style="margin-top: auto; color: #CF6679;">
+            <span class="material-icons">logout</span> Salir
+        </a>
+    </aside>
+
+    <main class="main">
+        <h2 style="border-bottom:1px solid #333; padding-bottom:15px;">Gestión de Usuarios</h2>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div style="padding:10px; background:#222; border-left:4px solid #BB86FC; margin-bottom:20px;">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Fecha Registro</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in usuarios %}
+                <tr>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div
+                                style="width:30px; height:30px; background:#555; border-radius:50%; display:flex; justify-content:center; align-items:center;">
+                                {{ u.username|slice:":1" }}
+                            </div>
+                            <a href="{% url 'admin_user_detail' u.id %}"
+                                style="color:white; text-decoration:none; font-weight:bold;">
+                                {{ u.username }}
+                            </a>
+                        </div>
+                    </td>
+                    <td style="color:#888;">{{ u.email }}</td>
+                    <td>
+                        {% if u.is_superuser %}
+                        <span class="badge badge-admin">Admin</span>
+                        {% else %}
+                        <span class="badge badge-user">Estudiante</span>
+                        {% endif %}
+                    </td>
+                    <td style="color:#888;">{{ u.date_joined|date:"d M Y" }}</td>
+                    <td>
+                        <a href="{% url 'admin_user_detail' u.id %}" class="btn-action" title="Ver Expediente"
+                            style="color:#81C995;">
+                            <span class="material-icons">visibility</span>
+                        </a>
+
+                        <a href="{% url 'admin_user_toggle' u.id %}" class="btn-action" title="Cambiar Rol"
+                            style="color:#BB86FC;">
+                            <span class="material-icons">admin_panel_settings</span>
+                        </a>
+
+                        <a href="{% url 'admin_user_delete' u.id %}" class="btn-action" title="Eliminar"
+                            style="color:#CF6679;"
+                            onclick="return confirm('¿Seguro que quieres eliminar a {{ u.username }}? Esto borrará todo su historial.');">
+                            <span class="material-icons">delete</span>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+
+</html>
