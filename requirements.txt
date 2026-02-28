@@ -70,3 +70,4 @@ gunicorn==23.0.0
 whitenoise==6.8.2
 dj-database-url==2.3.0
 google-cloud-texttospeech
+google-cloud-speech
