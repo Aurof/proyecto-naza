@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifica tu cuenta - Naza Bot</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #333;
+            margin-top: 20px;
+        }
+
+        .header {
+            background-color: #BB86FC;
+            /* Primary Color */
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #000000;
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .content {
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .message {
+            font-size: 16px;
+            color: #cccccc;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .code-box {
+            background-color: #252525;
+            border: 1px dashed #BB86FC;
+            color: #BB86FC;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 5px;
+            padding: 20px;
+            display: inline-block;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .footer {
+            background-color: #0f0f0f;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #666666;
+        }
+
+        a {
+            color: #BB86FC;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Naza Bot</h1>
+        </div>
+        <div class="content">
+            <p class="message">Hola <strong>{{ user.username }}</strong>,<br>¡Gracias por registrarte! Usa el siguiente
+                código para verificar tu cuenta:</p>
+
+            <div class="code-box">
+                {{ codigo }}
+            </div>
+
+            <p class="message">Si no solicitaste este código, puedes ignorar este correo.</p>
+        </div>
+        <div class="footer">
+            &copy; 2026 Naza Bot. Todos los derechos reservados.
+        </div>
+    </div>
+</body>
+
+</html>

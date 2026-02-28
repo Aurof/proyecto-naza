@@ -2,30 +2,48 @@
 <html>
 
 <head>
+    <meta charset="utf-8">
     <title>Reporte de Errores - Naza Bot</title>
     <style type="text/css">
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
         body {
-            font-family: Helvetica, sans-serif;
+            font-family: 'Helvetica', 'Arial', sans-serif;
             color: #333;
+            font-size: 12px;
+            line-height: 1.5;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #BB86FC;
-            padding-bottom: 10px;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #555;
+            padding-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .report-info {
+            color: #666;
+            font-size: 11px;
+            margin-top: 10px;
         }
 
         h1 {
-            color: #000;
-            font-size: 24px;
-            margin: 0;
-        }
-
-        h2 {
-            color: #666;
-            font-size: 14px;
-            margin: 5px 0;
+            color: #222;
+            font-size: 18px;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
         }
 
         /* Tabla de Errores */
@@ -36,78 +54,99 @@
         }
 
         th {
-            background-color: #f0f0f0;
-            padding: 8px;
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 10px;
             text-align: left;
-            font-size: 12px;
-            border-bottom: 1px solid #ccc;
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #ccc;
         }
 
         td {
-            padding: 10px;
+            padding: 12px 10px;
             border-bottom: 1px solid #eee;
-            font-size: 11px;
             vertical-align: top;
         }
 
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
         .original {
-            color: #CF6679;
+            color: #D32F2F;
             text-decoration: line-through;
+            display: block;
+            margin-bottom: 4px;
         }
 
         .correction {
-            color: #008f39;
+            color: #388E3C;
             font-weight: bold;
+            display: block;
         }
 
         .rule {
             display: block;
-            margin-top: 4px;
+            margin-top: 6px;
             color: #555;
             font-style: italic;
+            font-size: 11px;
+            background: #fff;
+            padding: 4px;
+            border-left: 2px solid #999;
         }
 
         .footer {
             position: fixed;
             bottom: 0;
-            width: 100%;
+            left: 0;
+            right: 0;
             text-align: center;
-            font-size: 10px;
-            color: #aaa;
+            font-size: 9px;
+            color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
         }
     </style>
 </head>
 
 <body>
     <div class="header">
-        <h1>Hoja de Estudio Personalizada</h1>
-        <h2>Estudiante: {{ usuario.first_name }} {{ usuario.last_name }} ({{ usuario.username }})</h2>
-        <h2>Fecha: {{ fecha_generacion|date:"d/m/Y H:i" }}</h2>
+        <div class="logo">Naza Learning Hub</div>
+        <h1>{{ report_title }}</h1>
+        <div class="report-info">
+            Estudiante: <strong>{% if usuario.first_name or usuario.last_name %}{{ usuario.first_name }} {{
+                usuario.last_name }}{% else %}{{ usuario.username }}{% endif %}</strong> &bull;
+            Generado: {{ fecha_generacion|date:"d/m/Y H:i" }}
+        </div>
     </div>
 
     <table>
         <thead>
             <tr>
                 <th width="15%">Fecha</th>
-                <th width="30%">Tu Error</th>
-                <th width="30%">Corrección</th>
-                <th width="25%">Regla Gramatical</th>
+                <th width="35%">Corrección</th>
+                <th width="50%">Explicación Gramatical</th>
             </tr>
         </thead>
         <tbody>
             {% for error in errores %}
             <tr>
-                <td>{{ error.timestamp|date:"d/m/Y" }}</td>
-                <td><span class="original">{{ error.texto_original }}</span></td>
-                <td><span class="correction">{{ error.texto_corregido }}</span></td>
+                <td style="color: #666;">{{ error.timestamp|date:"d/m/y" }}<br>{{ error.timestamp|date:"H:i" }}</td>
                 <td>
-                    <span class="rule">{{ error.explicacion_regla }}</span>
+                    <span class="original">{{ error.texto_original }}</span>
+                    <span class="correction">{{ error.texto_corregido }}</span>
+                </td>
+                <td>
+                    {{ error.explicacion_regla }}
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="4" style="text-align:center; padding: 20px;">
-                    ¡Excelente! No tienes errores registrados para estudiar.
+                <td colspan="3" style="text-align:center; padding: 30px; color: #777;">
+                    <i>No se encontraron errores registrados en este reporte.</i>
                 </td>
             </tr>
             {% endfor %}
@@ -115,7 +154,8 @@
     </table>
 
     <div class="footer">
-        Generado automáticamente por Naza Bot AI - Tesis de Ingeniería de Sistemas
+        Este documento fue generado automáticamente por Naza Bot AI. <br>
+        Continúa practicando para mejorar tu fluidez.
     </div>
 </body>
 

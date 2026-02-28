@@ -11,6 +11,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+import json
+import dj_database_url
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,6 +34,10 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.up.railway.app',
+]
+
 
 # Application definition
 
@@ -43,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -75,18 +86,17 @@ WSGI_APPLICATION = 'naza.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'naza_db',       # El nombre de la BD que creaste
-        'USER': 'root',           # El usuario por defecto de XAMPP
-        'PASSWORD': '',            # XAMPP no tiene contraseña por defecto
-        'HOST': 'localhost',      # O '127.0.0.1'
-        'PORT': '3306',           # El puerto por defecto de MySQL
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
-        }
-    }
+    'default': dj_database_url.config(
+        default='mysql://root:@localhost:3306/naza_db',
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
+# Fallback para XAMPP local si no detecta la variable DATABASE_URL de Railway
+if not os.getenv('DATABASE_URL'):
+    DATABASES['default']['OPTIONS'] = {
+        'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -129,16 +139,30 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# naza/settings.py
-# ... (al final del archivo)
-
-import os
-
 # --- CONFIGURACIÓN DE GOOGLE CLOUD ---
-# (Asegúrate de que 'BASE_DIR' esté definido al inicio de settings.py)
-GOOGLE_APPLICATION_CREDENTIALS = os.path.join(BASE_DIR, "tts-test-457216-dba0925ed1e8.json")
+# Si estamos en Railway (o en un host en producción) y definimos GOOGLE_CREDENTIALS_JSON:
+if os.getenv('GOOGLE_CREDENTIALS_JSON'):
+    creds_json = os.getenv('GOOGLE_CREDENTIALS_JSON')
+    creds_path = os.path.join(BASE_DIR, "google-credentials.json")
+    with open(creds_path, 'w') as f:
+        f.write(creds_json)
+    GOOGLE_APPLICATION_CREDENTIALS = creds_path
+else:
+    # Local fallback
+    GOOGLE_APPLICATION_CREDENTIALS = os.path.join(BASE_DIR, "tts-test-457216-dba0925ed1e8.json")
+
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+
+# --- ROTACIÓN DE API KEYS ---
+# Lista de todas las API keys disponibles para rotación
+GEMINI_API_KEYS = [
+    key for key in [
+        os.getenv('GEMINI_API_KEY'),
+        os.getenv('GEMINI_API_KEY_2'),
+        os.getenv('GEMINI_API_KEY_3'),
+    ] if key  # Filtrar None/vacías
+]
 
 LOGIN_URL = 'login'
 
@@ -149,6 +173,7 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'landing'
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Esto le dice a Django: "Busca archivos dentro de las carpetas 'static' de mis apps"
 STATICFILES_FINDERS = [
@@ -165,10 +190,6 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 # Seguridad (Opcional, pero recomendado si usas HTTPS, si es local ponlo en False)
 SESSION_COOKIE_SECURE = False
 
-
-# Cargar variables de entorno (al principio del archivo si es posible, o aquí)
-from dotenv import load_dotenv
-load_dotenv()
 
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' 
 

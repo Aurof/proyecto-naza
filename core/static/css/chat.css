@@ -65,41 +65,43 @@
     background-color: var(--text-muted);
 }
 
-/* --- MENÚ FLOTANTE DE USUARIO (Estilo Gemini) --- */
+/* --- MENÚ FLOTANTE DE USUARIO (Glassmorphism) --- */
 .user-menu-popup {
     position: absolute;
     bottom: 80px;
-    /* Justo encima del footer del usuario */
     left: 10px;
     width: 280px;
-    background-color: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 4px 15px var(--shadow);
+    background: rgba(15, 15, 15, 0.85);
+    /* Darker background, slightly transparent */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Slightly brighter border */
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
     display: none;
-    /* Oculto por defecto */
     flex-direction: column;
     overflow: hidden;
-    z-index: 1000;
+    z-index: 2500;
     opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.2s, transform 0.2s;
+    transform: translateY(10px) scale(0.97);
+    transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .user-menu-popup.visible {
     display: flex;
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
 }
 
 /* Cabecera del menú */
 .menu-header {
     padding: 15px;
-    border-bottom: 1px solid #3c4043;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     align-items: center;
     gap: 10px;
-    background-color: var(--hover-bg);
+    background-color: transparent;
 }
 
 .menu-header h3 {
@@ -246,6 +248,8 @@ body {
     flex-direction: column;
     padding: 20px;
     transition: 0.3s;
+    position: relative;
+    z-index: 1;
 }
 
 .logo-area {
@@ -278,15 +282,75 @@ body {
     gap: 5px;
     margin-bottom: 20px;
     transition: 0.2s;
+    width: 100%;
 }
 
 .new-chat-btn:hover {
     opacity: 0.9;
 }
 
+.learning-hub-btn {
+    background: linear-gradient(135deg, #03DAC6 0%, #018786 100%);
+    color: #000;
+    border: none;
+    padding: 13px 16px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(3, 218, 198, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.learning-hub-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transition: left 0.5s ease;
+}
+
+.learning-hub-btn:hover::before {
+    left: 100%;
+}
+
+.learning-hub-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(3, 218, 198, 0.4);
+}
+
+.learning-hub-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(3, 218, 198, 0.2);
+}
+
+.learning-hub-btn .material-icons {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.learning-hub-btn:hover .material-icons {
+    transform: scale(1.15);
+}
+
 .history-list {
     flex: 1;
     overflow-y: auto;
+    position: relative;
+    z-index: 1;
 }
 
 .history-item {
@@ -600,16 +664,27 @@ a:hover {
     max-height: 250px;
     /* Limit height */
     background: transparent;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     /* Messages start from top */
     mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 100%);
-    pointer-events: none;
-    /* Allow clicks through */
+    pointer-events: auto;
+    /* Allow scroll interaction */
     z-index: 5;
+    /* Hidden scrollbar */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+}
+
+.chat-messages::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
 }
 
 .message {
@@ -794,6 +869,180 @@ a:hover {
     color: #E0E0E0 !important;
     /* Texto blanco normal, no verde neón */
     border-bottom-left-radius: 2px;
+}
+
+/* --- BOTÓN GUARDAR NOTA (Premium) --- */
+.save-note-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.4);
+    padding: 4px;
+    margin-left: 8px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    vertical-align: middle;
+    position: relative;
+}
+
+.save-note-btn:hover {
+    color: #FFD700;
+    transform: scale(1.2);
+    background: rgba(255, 215, 0, 0.1);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.25);
+}
+
+.save-note-btn:active {
+    transform: scale(0.95);
+}
+
+/* --- BOTÓN ELIMINAR NOTA --- */
+.delete-note-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.35);
+    padding: 4px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+}
+
+.delete-note-btn:hover {
+    color: #CF6679;
+    transform: scale(1.15);
+    background: rgba(207, 102, 121, 0.1);
+}
+
+/* --- MODAL CONFIRMAR ELIMINACIÓN --- */
+.delete-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.delete-modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.delete-modal-card {
+    background: #1E1E2E;
+    border: 1px solid rgba(187, 134, 252, 0.2);
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 360px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(187, 134, 252, 0.1);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.delete-modal-overlay.visible .delete-modal-card {
+    transform: scale(1);
+}
+
+.delete-modal-card .modal-icon {
+    font-size: 3rem;
+    color: #CF6679;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.delete-modal-card h3 {
+    color: #E0E0E0;
+    font-size: 1.15rem;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+}
+
+.delete-modal-card p {
+    color: #888;
+    font-size: 0.9rem;
+    margin: 0 0 24px 0;
+}
+
+.delete-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.delete-modal-actions button {
+    padding: 10px 24px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-modal-cancel {
+    background: #2C2C3E;
+    color: #E0E0E0;
+}
+
+.btn-modal-cancel:hover {
+    background: #3C3C4E;
+}
+
+.btn-modal-delete {
+    background: linear-gradient(135deg, #CF6679, #B0003A);
+    color: white;
+    box-shadow: 0 4px 12px rgba(207, 102, 121, 0.3);
+}
+
+.btn-modal-delete:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 18px rgba(207, 102, 121, 0.4);
+}
+
+/* --- NOTE CARD STYLING --- */
+.note-card {
+    background: #2A2A3A;
+    border-radius: 12px;
+    padding: 14px 16px;
+    border-left: 3px solid #FFD700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.note-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.note-content {
+    color: #E0E0E0;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.note-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #666;
+    font-size: 0.78rem;
 }
 
 /* --- GAMIFICACIÓN --- */
@@ -1451,7 +1700,7 @@ input:checked+.slider:before {
     padding: 20px;
     border-radius: 12px;
     width: 300px;
-    z-index: 9002;
+    z-index: 9010;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     display: none;
 }
@@ -1854,3 +2103,45 @@ input:checked+.slider:before {
 .play-btn:hover {
     transform: scale(1.05);
 }
+
+/* --- BOTONES DE ICONO PEQUEÑOS (Para Historial) --- */
+.icon-btn-small {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.icon-btn-small:hover {
+    background: rgba(187, 134, 252, 0.1);
+}
+
+.icon-btn-small:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* --- TUTORIAL FIXES --- */
+.sidebar.sidebar-elevated {
+    z-index: 9005 !important;
+    position: relative;
+    /* Desktop needs this for z-index */
+    backdrop-filter: none !important;
+    /* Remove stacking context trigger */
+    transform: none !important;
+    /* Remove stacking context trigger */
+}
+
+@media screen and (max-width: 768px) {
+    .sidebar.sidebar-elevated {
+        position: fixed;
+        /* Restore fixed on mobile */
+    }
+}
+
+/* Transitions handled by transitions.js */

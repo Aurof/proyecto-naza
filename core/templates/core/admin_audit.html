@@ -214,6 +214,19 @@
             {% endif %}
         </form>
 
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+            <span style="color:#888; font-size: 0.9rem;">Filtros de Seguridad:</span>
+            <a href="?filtro_ia=all"
+                style="color: #E0E0E0; text-decoration: none; padding: 5px 10px; background: #333; border-radius: 4px; font-size: 0.8rem;">Todas</a>
+            <a href="?filtro_ia=toxic"
+                style="color: #000; text-decoration: none; padding: 5px 10px; background: #CF6679; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">Tóxico</a>
+            <a href="?filtro_ia=sexual"
+                style="color: #000; text-decoration: none; padding: 5px 10px; background: #FFB74D; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">Sexual</a>
+            <a href="?filtro_ia=hate"
+                style="color: #000; text-decoration: none; padding: 5px 10px; background: #BB86FC; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">Hate
+                Speech</a>
+        </div>
+
         <table>
             <thead>
                 <tr>
@@ -221,6 +234,7 @@
                     <th width="15%">Usuario / Chat</th>
                     <th width="10%">Emisor</th>
                     <th>Contenido del Mensaje</th>
+                    <th width="15%">Auditoría IA</th>
                 </tr>
             </thead>
             <tbody>
@@ -252,6 +266,18 @@
                             <span class="material-icons" style="font-size: 14px;">warning</span>
                             CORRECCIÓN ACTIVADA
                         </a>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if m.es_toxico %}
+                        <span style="color:#CF6679; font-weight:bold; font-size:0.8rem;">⚠️ {{ m.categoria_seguridad
+                            }}</span>
+                        <div style="font-size: 0.7rem; color: #888;">Confianza: {{ m.confianza_seguridad }}</div>
+                        {% elif m.categoria_seguridad and m.categoria_seguridad != 'SAFE' %}
+                        <span style="color:#FFB74D; font-size:0.8rem;">{{ m.categoria_seguridad }}</span>
+                        {% else %}
+                        <span style="color:#03DAC6; font-size:0.8rem;">SAFE</span>
                         {% endif %}
                     </td>
                 </tr>

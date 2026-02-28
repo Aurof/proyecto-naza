@@ -1,0 +1,499 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado: {{ quiz.titulo }} | Naza</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --bg-card: #1c1c1e;
+            --primary: #BB86FC;
+            --primary-dim: rgba(187, 134, 252, 0.15);
+            --text: #FFFFFF;
+            --text-secondary: #AAAAAA;
+            --success: #03DAC6;
+            --success-dim: rgba(3, 218, 198, 0.1);
+            --warning: #FFB74D;
+            --danger: #CF6679;
+            --danger-dim: rgba(207, 102, 121, 0.1);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.3s;
+            margin-bottom: 30px;
+        }
+
+        .back-link:hover {
+            color: var(--text);
+        }
+
+        /* --- SCORE HERO --- */
+        .score-hero {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--bg-card);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+
+        .score-circle-big {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            border: 5px solid;
+            position: relative;
+        }
+
+        .score-circle-big .value {
+            font-size: 2.8rem;
+            font-weight: 700;
+        }
+
+        .score-high {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .score-mid {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .score-low {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .score-hero h2 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .score-hero .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .score-detail {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .score-detail-item {
+            text-align: center;
+        }
+
+        .score-detail-item .num {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .score-detail-item .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .feedback-message {
+            margin-top: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            display: inline-block;
+        }
+
+        .feedback-great {
+            background: var(--success-dim);
+            color: var(--success);
+        }
+
+        .feedback-ok {
+            background: rgba(255, 183, 77, 0.1);
+            color: var(--warning);
+        }
+
+        .feedback-bad {
+            background: var(--danger-dim);
+            color: var(--danger);
+        }
+
+        /* --- QUESTION BREAKDOWN --- */
+        .breakdown-title {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .question-result {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+            border-left: 4px solid;
+            transition: 0.2s;
+        }
+
+        .question-result:hover {
+            transform: translateX(3px);
+        }
+
+        .question-result.correct {
+            border-left-color: var(--success);
+        }
+
+        .question-result.wrong {
+            border-left-color: var(--danger);
+        }
+
+        .qr-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .qr-number {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .qr-number .material-icons {
+            font-size: 1.1rem;
+        }
+
+        .qr-number .correct-icon {
+            color: var(--success);
+        }
+
+        .qr-number .wrong-icon {
+            color: var(--danger);
+        }
+
+        .qr-category {
+            padding: 3px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .qr-question {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .qr-answers {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .qr-answer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .qr-answer .material-icons {
+            font-size: 1.1rem;
+        }
+
+        .qr-answer.user-wrong {
+            background: var(--danger-dim);
+            color: var(--danger);
+        }
+
+        .qr-answer.user-correct {
+            background: var(--success-dim);
+            color: var(--success);
+        }
+
+        .qr-answer.correct-ref {
+            background: var(--success-dim);
+            color: var(--success);
+        }
+
+        .qr-explanation {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            border-left: 3px solid var(--primary);
+        }
+
+        .qr-explanation strong {
+            color: var(--primary);
+        }
+
+        /* --- FOOTER ACTION --- */
+        .footer-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            padding-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #444;
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text);
+            color: var(--text);
+        }
+
+        @media (max-width: 600px) {
+            .score-hero {
+                padding: 30px 15px;
+            }
+
+            .question-result {
+                padding: 18px;
+            }
+
+            .score-detail {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <a href="{% url 'quiz_dashboard' %}" class="back-link">
+            <span class="material-icons">arrow_back</span> Volver a Quizzes
+        </a>
+
+        <!-- SCORE HERO -->
+        <div class="score-hero">
+
+            {% if rewards %}
+            <div
+                style="background: rgba(255, 215, 0, 0.1); border: 1px solid #FFD700; border-radius: 12px; padding: 15px; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 15px;">
+                <span class="material-icons" style="color: #FFD700; font-size: 2rem;">emoji_events</span>
+                <div style="text-align: left;">
+                    <h3 style="margin: 0; color: #FFD700; font-size: 1.1rem;">¡Completado!</h3>
+                    <p style="margin: 0; color: #eee; font-size: 0.9rem;">Has ganado <strong>+{{ rewards.xp }}
+                            XP</strong></p>
+                </div>
+            </div>
+
+            {% if rewards.levelup %}
+            <div
+                style="background: linear-gradient(45deg, #FFD700, #FFA000); color: black; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; animation: pulse 2s infinite;">
+                ¡NIVEL {{ rewards.nivel_nuevo }} ALCANZADO! 🚀
+            </div>
+            <style>
+                @keyframes pulse {
+                    0% {
+                        transform: scale(1);
+                    }
+
+                    50% {
+                        transform: scale(1.05);
+                    }
+
+                    100% {
+                        transform: scale(1);
+                    }
+                }
+            </style>
+            {% endif %}
+            {% endif %}
+
+            <div
+                class="score-circle-big {% if puntaje >= 80 %}score-high{% elif puntaje >= 60 %}score-mid{% else %}score-low{% endif %}">
+                <span class="value">{{ puntaje|floatformat:0 }}%</span>
+            </div>
+
+            <h2>{{ quiz.titulo }}</h2>
+            <p class="subtitle">{{ quiz.idioma_tag }} &middot; {{ intento.fecha|date:"d M, Y H:i" }}</p>
+
+            <div class="score-detail">
+                <div class="score-detail-item">
+                    <div class="num" style="color: var(--success);">{{ correctas }}</div>
+                    <div class="label">Correctas</div>
+                </div>
+                <div class="score-detail-item">
+                    <div class="num" style="color: var(--danger);">{{ total|add:correctas|add:"-"|cut:"-" }}</div>
+                    <div class="label">Incorrectas</div>
+                </div>
+                <div class="score-detail-item">
+                    <div class="num">{{ total }}</div>
+                    <div class="label">Total</div>
+                </div>
+            </div>
+
+            {% if puntaje >= 90 %}
+            <div class="feedback-message feedback-great">Excelente! Dominas este material.</div>
+            {% elif puntaje >= 80 %}
+            <div class="feedback-message feedback-great">Muy bien! Solo te faltaron unos detalles para el 100%.</div>
+            {% elif puntaje >= 60 %}
+            <div class="feedback-message feedback-ok">Buen intento. Revisa las explicaciones abajo para mejorar.</div>
+            {% else %}
+            <div class="feedback-message feedback-bad">Necesitas repasar este material. Revisa cada explicación con
+                cuidado.</div>
+            {% endif %}
+        </div>
+
+        <!-- QUESTION BREAKDOWN -->
+        <p class="breakdown-title">Detalle por Pregunta</p>
+
+        {% for item in detalle %}
+        <div class="question-result {% if item.es_correcta %}correct{% else %}wrong{% endif %}">
+            <div class="qr-header">
+                <span class="qr-number">
+                    {% if item.es_correcta %}
+                    <span class="material-icons correct-icon">check_circle</span>
+                    {% else %}
+                    <span class="material-icons wrong-icon">cancel</span>
+                    {% endif %}
+                    Pregunta {{ item.numero }}
+                </span>
+                <span class="qr-category">{{ item.categoria }}</span>
+            </div>
+
+            <p class="qr-question">{{ item.pregunta }}</p>
+
+            <div class="qr-answers">
+                {% if item.es_correcta %}
+                <div class="qr-answer user-correct">
+                    <span class="material-icons">check_circle</span>
+                    Tu respuesta: <strong>{{ item.letra_usuario }}. {{ item.texto_usuario }}</strong>
+                </div>
+                {% else %}
+                <div class="qr-answer user-wrong">
+                    <span class="material-icons">cancel</span>
+                    Tu respuesta: <strong>{{ item.letra_usuario }}. {{ item.texto_usuario }}</strong>
+                </div>
+                <div class="qr-answer correct-ref">
+                    <span class="material-icons">check_circle</span>
+                    Correcta: <strong>{{ item.letra_correcta }}. {{ item.texto_correcta }}</strong>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if item.explicacion %}
+            <div class="qr-explanation">
+                <strong>Explicación:</strong> {{ item.explicacion }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- FOOTER -->
+        <div class="footer-actions">
+            <a href="{% url 'quiz_dashboard' %}" class="btn-action btn-primary">
+                <span class="material-icons">dashboard</span> Ver Dashboard
+            </a>
+            <a href="{% url 'home' %}" class="btn-action btn-outline">
+                <span class="material-icons">chat</span> Seguir Practicando
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        // Fix: compute incorrectas properly since Django template math is limited
+        (function () {
+            const total = {{ total }
+        };
+        const correctas = {{ correctas }};
+        const incorrectas = total - correctas;
+        // Find the incorrectas num and update
+        const detailItems = document.querySelectorAll('.score-detail-item');
+        if (detailItems.length >= 2) {
+            detailItems[1].querySelector('.num').innerText = incorrectas;
+        }
+        }) ();
+    </script>
+
+    <script src="{% static 'js/transitions.js' %}"></script>
+</body>
+
+</html>

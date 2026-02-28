@@ -1,0 +1,794 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reto de Vocabulario | Naza</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: #1c1c1e;
+            --primary: #BB86FC;
+            --text: #FFFFFF;
+            --text-secondary: #AAAAAA;
+            --success: #03DAC6;
+            --warning: #FFB74D;
+            --danger: #CF6679;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+        }
+
+        .header a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.3s;
+        }
+
+        .header a:hover {
+            color: var(--text);
+        }
+
+        /* --- FLASHCARD SCENE --- */
+        .scene {
+            width: 320px;
+            height: 540px;
+            /* A bit taller for transcript */
+            perspective: 1000px;
+            margin-top: -20px;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card__face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 24px;
+            background: var(--card-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 30px 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .card__face--front {
+            /* Front logic */
+        }
+
+        .card__face--back {
+            transform: rotateY(180deg);
+            background: linear-gradient(145deg, #18181a, #222225);
+        }
+
+        /* --- FRONT ELEMENTS --- */
+        .word-display {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .word-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+
+        .word-lang {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .mini-orb {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #BB86FC 0%, #3700b3 100%);
+            box-shadow: 0 0 20px rgba(187, 134, 252, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .mini-orb:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(187, 134, 252, 0.6);
+        }
+
+        .mini-orb.listening {
+            animation: pulse-red 1.5s infinite;
+            background: radial-gradient(circle, #CF6679 0%, #B00020 100%);
+            box-shadow: 0 0 20px rgba(207, 102, 121, 0.4);
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(207, 102, 121, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(207, 102, 121, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(207, 102, 121, 0);
+            }
+        }
+
+        .mini-orb i {
+            color: white;
+            font-size: 2.5rem;
+        }
+
+        .orb-hint {
+            position: absolute;
+            bottom: -25px;
+            color: #888;
+            font-size: 0.75rem;
+            width: 150px;
+            text-align: center;
+        }
+
+        /* New Live Transcript Style */
+        .live-transcript-box {
+            height: 30px;
+            margin-bottom: 15px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .live-transcript {
+            font-style: italic;
+            color: var(--success);
+            font-size: 0.9rem;
+            opacity: 0.9;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .input-area {
+            width: 100%;
+        }
+
+        .challenge-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            background: #121212;
+            border: 1px solid #333;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .challenge-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #0a0a0a;
+        }
+
+        .challenge-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(187, 134, 252, 0.1);
+        }
+
+        .btn-check {
+            width: 100%;
+            padding: 15px;
+            border-radius: 50px;
+            background: var(--success);
+            color: #000;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            transition: 0.2s;
+            opacity: 0.5;
+            /* Inicialmente deshabilitado visualmente */
+            pointer-events: none;
+        }
+
+        .btn-check.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .btn-check:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        /* --- BACK ELEMENTS --- */
+        .result-header {
+            text-align: center;
+            width: 100%;
+        }
+
+        .score-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin: 0 auto 15px;
+            border: 4px solid #333;
+        }
+
+        .score-good {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .score-bad {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .correct-answer {
+            font-size: 1.8rem;
+            color: var(--text);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .user-answer-display {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .btn-audio-hint {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 10px auto;
+            transition: 0.2s;
+        }
+
+        .btn-audio-hint:hover {
+            background: rgba(187, 134, 252, 0.1);
+        }
+
+        .example-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            font-style: italic;
+            font-size: 0.9rem;
+            color: #ccc;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .srs-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-srs {
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+        }
+
+        .empty-state h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--success);
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: 24px;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* MOBILE */
+        @media (max-width: 480px) {
+            body {
+                overflow-y: auto;
+                height: auto;
+                min-height: 100vh;
+                padding: 60px 15px 30px;
+            }
+
+            .scene {
+                width: 100%;
+                max-width: 320px;
+                height: 500px;
+                margin-top: 0;
+            }
+
+            .word-title {
+                font-size: 1.6rem;
+            }
+
+            .mini-orb {
+                width: 70px;
+                height: 70px;
+            }
+
+            .mini-orb i {
+                font-size: 2rem;
+            }
+
+            .challenge-input {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+
+            .btn-check,
+            .btn-srs {
+                padding: 10px;
+                font-size: 0.85rem;
+            }
+
+            .srs-controls {
+                gap: 8px;
+            }
+
+            .score-circle {
+                width: 65px;
+                height: 65px;
+                font-size: 1.3rem;
+            }
+
+            .header {
+                top: 10px;
+                left: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <a href="{% url 'quiz_dashboard' %}">
+            <span class="material-icons">arrow_back</span> Volver al Centro de Aprendizaje
+        </a>
+    </div>
+
+    {% if palabras %}
+
+    <div class="scene">
+        <div class="card" id="flashcard">
+
+            <!-- FRENTE: EL RETO -->
+            <div class="card__face card__face--front">
+                <div class="word-display">
+                    <p class="word-lang">Pronuncia la siguiente frase:</p>
+                    <h1 class="word-title" id="target-word">{{ palabras.0.palabra }}</h1>
+                </div>
+
+                <!-- MICRÓFONO -->
+                <div class="mini-orb" id="mic-btn" onclick="toggleRecording()" title="Clic para hablar">
+                    <i class="material-icons" id="mic-icon">mic</i>
+                    <div class="orb-hint" id="mic-hint">Toca para hablar</div>
+                </div>
+
+                <!-- LIVE TRANSCRIPT -->
+                <div class="live-transcript-box">
+                    <span id="live-text" class="live-transcript">...</span>
+                </div>
+
+                <div class="input-area">
+                    <!-- INICIO: BLOQUEADO POR DEFECTO -->
+                    <input type="text" id="user-input" class="challenge-input" placeholder="Primero pronuncia..."
+                        autocomplete="off" disabled>
+
+                    <button id="btn-submit" class="btn-check" onclick="checkAnswer()">Comprobar</button>
+                </div>
+
+                <div id="loader" class="loading-overlay">
+                    <span class="material-icons"
+                        style="color:var(--primary); font-size:3rem; animation:spin 1s infinite;">autorenew</span>
+                </div>
+            </div>
+
+            <!-- DORSO: EL RESULTADO -->
+            <div class="card__face card__face--back">
+                <div class="result-header">
+                    <div class="score-circle" id="score-display">--</div>
+                    <div id="pronunciation-feedback" style="font-size:0.8rem; margin-bottom:10px; color:#aaa;">Puntaje
+                        de Pronunciación</div>
+                    <div class="correct-answer">{{ palabras.0.traduccion }}</div>
+                    <div class="user-answer-display">Tú escribiste: <span id="user-written-display"
+                            style="color:white;">--</span></div>
+                </div>
+
+                {% if palabras.0.ejemplo %}
+                <div class="example-box">"{{ palabras.0.ejemplo }}"</div>
+                {% endif %}
+
+                <!-- AUDIO HINT (Only if low score) -->
+                <button class="btn-audio-hint" id="audio-hint-btn" onclick="playTTS()" style="display:none;"
+                    title="Escuchar pronunciación correcta">
+                    <span class="material-icons">volume_up</span>
+                </button>
+
+                <div class="srs-controls">
+                    <button class="btn-srs" style="background:#CF6679; color:white;"
+                        onclick="rate('dificil')">Difícil</button>
+                    <button class="btn-srs" style="background:#FFB74D; color:black;"
+                        onclick="rate('bien')">Bien</button>
+                    <button class="btn-srs" style="background:#03DAC6; color:black;"
+                        onclick="rate('facil')">Fácil</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- VARIABLES ---
+        const card = document.getElementById('flashcard');
+        const micBtn = document.getElementById('mic-btn');
+        const micIcon = document.getElementById('mic-icon');
+        const micHint = document.getElementById('mic-hint');
+        const liveText = document.getElementById('live-text');
+        const loader = document.getElementById('loader');
+        const userInput = document.getElementById('user-input');
+        const btnSubmit = document.getElementById('btn-submit');
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        let audioBlobFinal = null;
+        let recognition = null; // Web Speech API
+
+        const currentId = "{{ palabras.0.id }}";
+        const currentWord = "{{ palabras.0.palabra }}";
+        const correctTrans = "{{ palabras.0.traduccion }}";
+        const targetLang = "{{ target_lang }}";
+
+        // --- INIT WEB SPEECH API ---
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false; // Only one phrase
+            recognition.interimResults = true;
+            recognition.lang = targetLang; // Use dynamic lang
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        liveText.innerText = transcript;
+                        playDing();
+                        stopRecording(); // AUTO STOP ON SUCCESS
+                    } else {
+                        interimTranscript += transcript;
+                        liveText.innerText = interimTranscript;
+                    }
+                }
+            };
+
+            recognition.onend = () => {
+                // Optimization: If it ends but recording is still on (e.g. silence), stop it.
+                if (isRecording) {
+                    stopRecording();
+                }
+            };
+        }
+
+        // --- AUDIO LOGIC ---
+
+        function toggleRecording() {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        function startRecording() {
+            liveText.innerText = "...";
+
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = e => {
+                        audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        audioBlobFinal = new Blob(audioChunks, { type: 'audio/webm' });
+                        unlockInput();
+                    };
+
+                    isRecording = true;
+                    micBtn.classList.add('listening');
+                    micIcon.innerText = 'graphic_eq';
+                    micHint.innerText = "Escuchando...";
+
+                    // START RECOGNITION (Visual only)
+                    if (recognition) {
+                        try {
+                            recognition.start();
+                        } catch (e) { console.log("Recognition already started"); }
+                    }
+                })
+                .catch(err => {
+                    console.error("Error mic:", err);
+                    alert("No se pudo acceder al micrófono.");
+                });
+        }
+
+        function stopRecording() {
+            if (isRecording) {
+                if (mediaRecorder) mediaRecorder.stop();
+                if (recognition) recognition.stop();
+
+                isRecording = false;
+                micBtn.classList.remove('listening');
+                micIcon.innerText = 'check'; // Visual feedback
+                micHint.innerText = "¡Capturado!";
+            }
+        }
+
+        function unlockInput() {
+            userInput.disabled = false;
+            userInput.placeholder = "Escribe el significado...";
+            userInput.focus();
+            btnSubmit.classList.add('active');
+        }
+
+        function playDing() {
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, context.currentTime); // High pitch
+                oscillator.frequency.exponentialRampToValueAtTime(1200, context.currentTime + 0.1);
+
+                gainNode.gain.setValueAtTime(0.1, context.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+
+                oscillator.start();
+                oscillator.stop(context.currentTime + 0.5);
+            } catch (e) {
+                console.warn("AudioContext error", e);
+            }
+        }
+
+        // --- CHECK LOGIC ---
+
+        async function checkAnswer() {
+            if (userInput.disabled) return;
+            loader.classList.add('active');
+
+            const writtenAnswer = document.getElementById('user-input').value.trim();
+            let pronunciationScore = 0;
+            let spokenText = "";
+
+            if (audioBlobFinal) {
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const base64Audio = reader.result.split(',')[1];
+                    try {
+                        const res = await fetch('/api/stt/', {
+                            method: 'POST',
+                            body: JSON.stringify({ audio_base64: base64Audio, language_code: targetLang }),
+                            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                        });
+                        const data = await res.json();
+
+                        pronunciationScore = Math.round((data.confidence || 0) * 100);
+                        spokenText = data.transcript;
+
+                        finalizeCheck(writtenAnswer, pronunciationScore, spokenText);
+                    } catch (e) {
+                        console.error("STT Error:", e);
+                        finalizeCheck(writtenAnswer, 0, "Error");
+                    }
+                };
+                reader.readAsDataURL(audioBlobFinal);
+            } else {
+                finalizeCheck(writtenAnswer, 0, "--");
+            }
+        }
+
+        function finalizeCheck(written, score, spoken) {
+            const scoreDisplay = document.getElementById('score-display');
+            scoreDisplay.innerText = score + "%";
+
+            if (score > 70) {
+                scoreDisplay.className = "score-circle score-good";
+            } else {
+                scoreDisplay.className = "score-circle score-bad";
+                document.getElementById('audio-hint-btn').style.display = "flex";
+            }
+
+            document.getElementById('user-written-display').innerText = written || "(Nada)";
+            loader.classList.remove('active');
+            card.classList.add('is-flipped');
+        }
+
+        // --- UTILS ---
+
+        function playTTS() {
+            fetch('/api/tts_word/', {
+                method: 'POST',
+                body: JSON.stringify({ text: currentWord, lang: targetLang }),
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.audio_base64) {
+                        new Audio("data:audio/mp3;base64," + data.audio_base64).play();
+                    }
+                });
+        }
+
+        function rate(calificacion) {
+            fetch("{% url 'repaso_vocabulario' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie('csrftoken'),
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `vocab_id=${currentId}&calificacion=${calificacion}`
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        location.reload();
+                    }
+                });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = "@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }";
+        document.head.appendChild(styleSheet);
+
+    </script>
+
+    {% else %}
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state">
+        <span class="material-icons"
+            style="font-size: 5rem; color: var(--success); margin-bottom: 20px;">check_circle</span>
+        <h2>¡Todo al día! 🎉</h2>
+        <p style="margin-bottom:30px;">No tienes palabras pendientes de repaso.</p>
+        <a href="{% url 'home' %}" class="btn-check"
+            style="text-decoration:none; display:inline-block; width:auto; padding: 15px 40px; opacity: 1; pointer-events: all; cursor: pointer;">Volver
+            a Practicar</a>
+    </div>
+
+    {% endif %}
+
+    <script src="{% static 'js/transitions.js' %}"></script>
+</body>
+
+</html>

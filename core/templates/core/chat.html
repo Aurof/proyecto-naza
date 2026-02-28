@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Naza Bot - Chat</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/chat.css' %}?v=32">
+    <link rel="stylesheet" href="{% static 'css/chat.css' %}?v=43">
     <link rel="stylesheet" href="{% static 'css/sound_wave.css' %}">
 </head>
 
@@ -25,6 +25,10 @@
             <img src="{% static 'img/naza_logo_v2.png' %}" class="logo-mini">
             <span>Naza Bot</span>
         </div>
+        <a href="{% url 'quiz_dashboard' %}" class="learning-hub-btn"
+            style="background: linear-gradient(135deg, #03DAC6 0%, #018786 100%); color: #000; padding: 12px; border-radius: 50px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 14px; text-decoration: none; width: 100%; box-sizing: border-box; box-shadow: 0 2px 8px rgba(3,218,198,0.35); transition: all 0.3s ease;">
+            <span class="material-icons" style="font-size: 1.1rem;">school</span> Centro de Aprendizaje
+        </a>
         <button class="new-chat-btn">
             <span class="material-icons">add</span> Nueva Sesión
         </button>
@@ -60,100 +64,70 @@
             </div>
             <span class="material-icons" style="color: #888;">expand_less</span>
         </div>
-    </aside>
 
-    <div class="user-menu-popup" id="user-menu-popup">
-        <!-- (Contenido del menú de usuario sin cambios...) -->
-        <div id="view-main" class="submenu-view active">
-            <div class="menu-header">
-                <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
-                    <div class="avatar"
-                        style="width: 35px; height: 35px; background: var(--accent); color: white; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold;">
-                        {{ request.user.username|slice:":1"|upper }}
-                    </div>
-                    <div>
-                        <h3>{{ request.user.first_name }}</h3>
-                        <p>{{ request.user.email }}</p>
+        <div class="user-menu-popup" id="user-menu-popup">
+            <!-- (Contenido del menú de usuario sin cambios...) -->
+            <div id="view-main" class="submenu-view active">
+                <div class="menu-header">
+                    <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
+                        <div class="avatar"
+                            style="width: 35px; height: 35px; background: var(--accent); color: white; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold;">
+                            {{ request.user.username|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <h3>{{ request.user.first_name }}</h3>
+                            <p>{{ request.user.email }}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
 
 
-            <div class="menu-body">
-                {% if user.is_superuser %}
-                <a href="{% url 'admin_dashboard' %}" class="menu-btn" style="text-decoration: none;">
-                    <span class="material-icons" style="color: var(--secondary);">dashboard</span> Panel Admin
-                </a>
-                {% endif %}
+                <div class="menu-body">
+                    {% if user.is_superuser %}
+                    <a href="{% url 'admin_dashboard' %}" class="menu-btn" style="text-decoration: none;">
+                        <span class="material-icons" style="color: var(--secondary);">dashboard</span> Panel Admin
+                    </a>
+                    {% endif %}
 
-                <a href="{% url 'historial_errores' %}" class="menu-btn" style="text-decoration: none;">
-                    <span class="material-icons">history_edu</span> Historial de Errores
-                </a>
+                    <a href="{% url 'historial_errores' %}" class="menu-btn" style="text-decoration: none;">
+                        <span class="material-icons">history_edu</span> Historial de Errores
+                    </a>
 
-                <button class="menu-btn" onclick="startTutorial()">
-                    <span class="material-icons">help_outline</span> Ver Tutorial
-                </button>
-                <button class="menu-btn" onclick="openScenarioHub()" id="scenario-selector-btn">
-                    <span class="material-icons" style="color: #03DAC6;">theater_comedy</span>
-                    <span id="current-scenario-text">Conversación Libre</span>
-                </button>
-                <button class="menu-btn" onclick="openGameHub()">
-                    <span class="material-icons" style="color: #FFD700;">emoji_events</span> Gamificación y Stats
-                </button>
-                <div style="height: 1px; background: #3c4043; margin: 8px 0;"></div>
-                <!-- THEME TOGGLE -->
-                <button class="menu-btn" id="theme-btn">
-                    <span class="material-icons" id="theme-icon">dark_mode</span>
-                    <span id="theme-text">Modo Oscuro</span>
-                </button>
-                <button class="menu-btn" onclick="showSubmenu('view-voice')">
-                    <span class="material-icons">record_voice_over</span> Configurar Voz
-                </button>
-                <div style="height: 1px; background: #3c4043; margin: 8px 0;"></div>
-                <a href="{% url 'logout' %}" class="menu-btn logout">
-                    <span class="material-icons">logout</span> Cerrar Sesión
-                </a>
-            </div>
-        </div>
 
-        <div id="view-voice" class="submenu-view">
-            <div class="menu-body">
-                <button class="btn-back" onclick="showSubmenu('view-main')">
-                    <span class="material-icons">arrow_back</span> Volver
-                </button>
-                <h4 style="margin: 0 0 15px 0; color: white;">Voz del Tutor</h4>
 
-                <div class="voice-form">
-                    <label>Selecciona la Voz:</label>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <select id="setting-voice-code" style="flex: 1;">
-                            <option value="en-US-Standard-B">Inglés (H) - Estándar</option>
-                            <option value="en-US-Wavenet-C">Inglés (M) - WaveNet (Pro)</option>
-                            <option value="es-ES-Standard-B">Español (H) - Estándar</option>
-                            <option value="es-ES-Wavenet-C">Español (M) - WaveNet (Pro)</option>
-                        </select>
-                        <button type="button" onclick="previewVoice()" title="Escuchar demostración"
-                            style="background: #3c4043; border: 1px solid #5f6368; color: #8ab4f8; border-radius: 4px; padding: 5px 10px; cursor: pointer; display: flex; align-items: center;">
-                            <span class="material-icons" style="font-size: 1.2rem;">volume_up</span>
-                        </button>
-                    </div>
+                    <a href="{% url 'perfil' %}" class="menu-btn" style="text-decoration: none;">
+                        <span class="material-icons" style="color: #BB86FC;">settings</span> Configurar Idiomas & Perfil
+                    </a>
 
-                    <label>Velocidad (<span id="speed-val">1.0</span>x):</label>
-                    <input type="range" id="setting-speed" min="0.5" max="1.5" step="0.1" value="1.0"
-                        oninput="document.getElementById('speed-val').innerText = this.value">
-
-                    <button onclick="saveVoiceSettings()"
-                        style="width:100%; background:#BB86FC; color:black; border:none; padding:10px; border-radius:4px; margin-top:15px; font-weight:bold; cursor:pointer;">
-                        Guardar Cambios
+                    <button class="menu-btn" onclick="startTutorial()">
+                        <span class="material-icons">help_outline</span> Ver Tutorial
                     </button>
-                    <p id="save-status"
-                        style="font-size:0.8rem; color:#81c995; text-align:center; margin-top:5px; display:none;">
-                        ¡Guardado!</p>
+                    <button class="menu-btn" onclick="openScenarioHub()" id="scenario-selector-menu-btn">
+                        <span class="material-icons" style="color: #03DAC6;">theater_comedy</span>
+                        <span id="current-scenario-text">Conversación Libre</span>
+                    </button>
+                    <button class="menu-btn" onclick="openGameHub()">
+                        <span class="material-icons" style="color: #FFD700;">emoji_events</span> Gamificación y Stats
+                    </button>
+                    <div style="height: 1px; background: #3c4043; margin: 8px 0;"></div>
+                    <!-- THEME TOGGLE -->
+                    <button class="menu-btn" id="theme-btn">
+                        <span class="material-icons" id="theme-icon">dark_mode</span>
+                        <span id="theme-text">Modo Oscuro</span>
+                    </button>
+
+                    <div style="height: 1px; background: #3c4043; margin: 8px 0;"></div>
+                    <a href="{% url 'logout' %}" class="menu-btn logout">
+                        <span class="material-icons">logout</span> Cerrar Sesión
+                    </a>
                 </div>
             </div>
+
+
         </div>
-    </div>
+
+    </aside>
 
     <main class="orb-container">
 
@@ -272,16 +246,25 @@
                 <span class="material-icons">rule</span>
             </button>
 
-            <!-- 4. Historial Normal -->
-            <button onclick="toggleHistoryDrawer()" title="Ver conversación completa" class="fab-btn">
-                <span class="material-icons">forum</span>
-            </button>
+
 
             <!-- 5. Teclado -->
             <button onclick="toggleKeyboard()" title="Escribir texto" class="fab-btn">
                 <span class="material-icons">keyboard</span>
             </button>
         </div>
+
+        <!-- Botón Flotante de NOTAS (Posición Personalizada: Derecha Centro) -->
+        <button onclick="toggleNotesDrawer()" title="Mis Notas" class="fab-btn"
+            style="position: fixed; right: 20px; top: 45%; transform: translateY(-50%); background:#FFD700; color:black; z-index: 1000; width: 50px; height: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            <span class="material-icons">sticky_note_2</span>
+        </button>
+
+        <!-- Botón Flotante de HISTORIAL (Debajo de Notas) -->
+        <button onclick="toggleHistoryDrawer()" title="Historial y Guardar Notas" class="fab-btn"
+            style="position: fixed; right: 20px; top: 55%; transform: translateY(-50%); background:#03DAC6; color:black; z-index: 1000; width: 50px; height: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            <span class="material-icons">history</span>
+        </button>
 
         <div id="keyboard-area" style="display:none; position:absolute; bottom:20px; right: 80px; width:300px;">
             <input type="text" id="text-input" class="input-box"
@@ -302,17 +285,7 @@
         </div>
     </div>
 
-    <!-- History Drawer -->
-    <aside class="history-drawer" id="history-drawer">
-        <div class="drawer-header">
-            <h3>Conversación</h3>
-            <button onclick="toggleHistoryDrawer()" style="background:none; border:none; color:#888; cursor:pointer;">
-                <span class="material-icons">close</span>
-            </button>
-        </div>
-        <div class="drawer-body" id="full-history-box">
-        </div>
-    </aside>
+
 
     <!-- Errors Drawer -->
     <aside class="errors-drawer" id="errors-drawer">
@@ -323,7 +296,8 @@
             </button>
         </div>
         <div class="drawer-body" id="errors-box">
-            <p class="no-errors-msg" style="color: #666; text-align: center; margin-top: 20px;">No hay errores en esta
+            <p class="no-errors-msg" style="color: #666; text-align: center; margin-top: 20px;">No hay errores en
+                esta
                 conversación.</p>
         </div>
     </aside>
@@ -338,8 +312,36 @@
             </button>
         </div>
         <div class="drawer-body" id="pronunciation-box">
-            <p class="no-errors-msg" style="color: #666; text-align: center; margin-top: 20px;">Cargando historial...
+            <p class="no-errors-msg" style="color: #666; text-align: center; margin-top: 20px;">Cargando
+                historial...
             </p>
+        </div>
+    </aside>
+
+    <!-- Notes Drawer (NUEVO) -->
+    <aside class="errors-drawer" id="notes-drawer">
+        <div class="drawer-header" style="border-bottom: 2px solid #FFD700;">
+            <h3>Mis Notas de Estudio 📝</h3>
+            <button onclick="toggleNotesDrawer()" style="background:none; border:none; color:#888; cursor:pointer;">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="drawer-body" id="notes-box">
+            <p class="no-errors-msg" style="color: #666; text-align: center; margin-top: 20px;">Cargando notas...
+            </p>
+        </div>
+    </aside>
+
+    <!-- History Drawer (NUEVO: Para guardar notas desde el historial) -->
+    <aside class="errors-drawer" id="history-drawer">
+        <div class="drawer-header" style="border-bottom: 2px solid #03DAC6;">
+            <h3>Historial de Chat 💬</h3>
+            <button onclick="toggleHistoryDrawer()" style="background:none; border:none; color:#888; cursor:pointer;">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="drawer-body" id="full-history-box">
+            <!-- AQUÍ SE INSERTAN LOS MENSAJES CON BOTÓN DE GUARDAR NOTA -->
         </div>
     </aside>
 
@@ -494,17 +496,72 @@
         }
 
         // --- CONTROL DE DRAWERS ---
-        function toggleHistoryDrawer() {
-            document.getElementById('history-drawer').classList.toggle('open');
-            document.getElementById('errors-drawer').classList.remove('open'); // Close others
+        // --- CONTROL DE DRAWERS ---
+        function closeAllDrawers() {
+            document.querySelectorAll('.errors-drawer').forEach(el => el.classList.remove('open'));
+            document.getElementById('btn-errors-toggle').classList.remove('notification-active');
         }
-        function toggleErrorsDrawer() {
-            document.getElementById('errors-drawer').classList.toggle('open');
-            document.getElementById('history-drawer').classList.remove('open'); // Close others
-            // Remove notification if open
-            if (document.getElementById('errors-drawer').classList.contains('open')) {
-                btnErrorsToggle.classList.remove('notification-active');
+
+        function toggleHistoryDrawer() {
+            const drawer = document.getElementById('history-drawer');
+            const wasOpen = drawer.classList.contains('open');
+            closeAllDrawers();
+            if (!wasOpen) drawer.classList.add('open');
+        }
+
+        function toggleNotesDrawer() {
+            const drawer = document.getElementById('notes-drawer');
+            const wasOpen = drawer.classList.contains('open');
+            closeAllDrawers();
+            if (!wasOpen) {
+                drawer.classList.add('open');
+                loadNotes(); // Cargar notas al abrir
             }
+        }
+
+        function toggleErrorsDrawer() {
+            const drawer = document.getElementById('errors-drawer');
+            const wasOpen = drawer.classList.contains('open');
+            closeAllDrawers();
+            if (!wasOpen) drawer.classList.add('open');
+        }
+
+        function togglePronunciationDrawer() {
+            const drawer = document.getElementById('pronunciation-drawer');
+            const wasOpen = drawer.classList.contains('open');
+            closeAllDrawers();
+            if (!wasOpen) drawer.classList.add('open');
+        }
+
+        // --- AUDIO CUES (Web Audio API) ---
+        const cueAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playStartSound() {
+            const osc = cueAudioCtx.createOscillator();
+            const gain = cueAudioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(cueAudioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, cueAudioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(900, cueAudioCtx.currentTime + 0.12);
+            gain.gain.setValueAtTime(0.18, cueAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, cueAudioCtx.currentTime + 0.2);
+            osc.start(cueAudioCtx.currentTime);
+            osc.stop(cueAudioCtx.currentTime + 0.2);
+        }
+
+        function playStopSound() {
+            const osc = cueAudioCtx.createOscillator();
+            const gain = cueAudioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(cueAudioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(700, cueAudioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(400, cueAudioCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.15, cueAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, cueAudioCtx.currentTime + 0.25);
+            osc.start(cueAudioCtx.currentTime);
+            osc.stop(cueAudioCtx.currentTime + 0.25);
         }
 
         // --- RECONOCIMIENTO DE VOZ (Web Speech API) ---
@@ -558,25 +615,25 @@
                 }
 
                 if (currentUserBubble) {
-                    const bubbleContent = currentUserBubble.querySelector('.bubble');
+                    const bubbleContent = currentUserBubble.querySelector('.bubble-content') || currentUserBubble.querySelector('.bubble');
                     if (bubbleContent) bubbleContent.textContent = transcript;
                     messagesBox.scrollTo({ top: messagesBox.scrollHeight, behavior: 'smooth' });
                 }
                 if (currentDrawerBubble) {
-                    const bubbleContent = currentDrawerBubble.querySelector('.bubble');
+                    const bubbleContent = currentDrawerBubble.querySelector('.bubble-content') || currentDrawerBubble.querySelector('.bubble');
                     if (bubbleContent) bubbleContent.textContent = transcript;
                     fullHistoryBox.scrollTo({ top: fullHistoryBox.scrollHeight, behavior: 'smooth' });
                 }
 
                 silenceTimer = setTimeout(() => {
                     stopListening();
-                }, 2500);
+                }, 2000);
             };
 
             recognition.onend = () => {
                 if (!isSpeaking) {
                     if (currentUserBubble) {
-                        const bubbleContent = currentUserBubble.querySelector('.bubble');
+                        const bubbleContent = currentUserBubble.querySelector('.bubble-content') || currentUserBubble.querySelector('.bubble');
                         const text = bubbleContent.textContent;
 
                         if (text.trim() !== "" && text !== "...") {
@@ -670,6 +727,8 @@
             // Ocultar botón de ayuda anterior al empezar a hablar
             document.getElementById('btn-pronunciation-help').style.display = 'none';
             try {
+                if (cueAudioCtx.state === 'suspended') cueAudioCtx.resume();
+                playStartSound();
                 recognition.start();
             } catch (e) {
                 console.error(e);
@@ -677,6 +736,7 @@
         }
 
         function stopListening() {
+            playStopSound();
             recognition.stop();
         }
 
@@ -747,11 +807,18 @@
                 });
                 clearTimeout(timeoutId);
 
-                if (!res.ok) throw new Error(`Server error: ${res.status}`);
+                if (!res.ok) {
+                    let errorMessage = `Server Error: ${res.status}`;
+                    try {
+                        const errData = await res.json();
+                        if (errData.error) errorMessage = errData.error;
+                    } catch (jsonErr) { }
+                    throw new Error(errorMessage);
+                    if (currentBotDrawerBubble) currentBotDrawerBubble.remove();
+                }
 
                 const data = await res.json();
                 console.log("🔥 SERVER DEBUG > EnviarAlCerebro Data:", data);
-                console.log("🔥 SERVER DEBUG > Tip:", data.tip_pronunciacion);
 
                 if (data.error) {
                     resetOrb();
@@ -775,8 +842,7 @@
                     // FORCE SHOW BUTTON IF IT WAS HIDDEN
                     fab.style.display = 'flex';
 
-                    // Solo actualizamos si el botón está visible (significa que hubo error)
-                    // O forzamos visibilidad si backend dice que hubo error
+                    // Solo actualizamos si el botón está visible
                     if (data.tip_pronunciacion) {
                         if (correction) {
                             fab.dataset.correction = correction;
@@ -787,28 +853,20 @@
 
                 if (data.gamification) {
                     const game = data.gamification;
-
-                    // Animamos el XP
+                    // Animamos UI de XP/Nivel
                     const xpLabel = document.getElementById('stat-xp');
-                    const currentXP = parseInt(xpLabel.innerText); // Leer valor actual
+                    const currentXP = parseInt(xpLabel.innerText);
                     const targetXP = game.xp_actual;
 
-                    // Solo animar la parte numérica, luego agregar " XP"
                     if (targetXP > currentXP) {
-                        // Truco visual simple: animamos el número y luego concatenamos
-                        xpLabel.innerText = targetXP + " XP"; // O usa animateValue si quieres ser purista
-
-                        // Actualizar también el Hub por si está abierto
+                        xpLabel.innerText = targetXP + " XP";
                         document.getElementById('hub-xp').innerText = targetXP;
                     }
-
-                    // Actualizar Nivel y Racha
                     document.getElementById('stat-level').innerText = "Nvl " + game.nivel_actual;
                     document.getElementById('stat-streak').innerText = game.racha_actual;
                     document.getElementById('hub-level').innerText = game.nivel_actual;
                     document.getElementById('hub-streak').innerText = game.racha_actual;
 
-                    // Level Up Popup
                     if (game.subio_nivel) {
                         document.getElementById('new-level-num').innerText = game.nivel_actual;
                         document.getElementById('levelup-popup').classList.add('active');
@@ -828,14 +886,9 @@
 
                 if (data.audio_base64) {
                     const audio = new Audio("data:audio/mp3;base64," + data.audio_base64);
-
-                    // --- REAL-TIME VISUALIZER HOOK ---
-                    // Try to connect visualizer without breaking flow if error
                     try {
                         setupVisualizer(audio);
-                    } catch (err) {
-                        console.error("Visualizer Error:", err);
-                    }
+                    } catch (err) { console.error(err); }
 
                     audio.play();
                     audio.onended = () => {
@@ -850,8 +903,8 @@
                 }
 
                 if (currentBotBubble) {
-                    const bubbleContent = currentBotBubble.querySelector('.bubble');
-                    typeWriter(data.bot_text, bubbleContent, currentBotDrawerBubble ? currentBotDrawerBubble.querySelector('.bubble') : null);
+                    const bubbleContent = currentBotBubble.querySelector('.bubble-content') || currentBotBubble.querySelector('.bubble');
+                    typeWriter(data.bot_text, bubbleContent, currentBotDrawerBubble ? (currentBotDrawerBubble.querySelector('.bubble-content') || currentBotDrawerBubble.querySelector('.bubble')) : null);
                 } else {
                     agregarMensaje('bot', data.bot_text);
                 }
@@ -865,12 +918,14 @@
                 clearTimeout(timeoutId);
                 console.error(e);
                 resetOrb();
-                let errorMsg = "Error en el cerebro.";
+
+                let errorMsg = e.message || "Error desconocido";
                 if (e.name === 'AbortError') {
                     errorMsg = "El cerebro tardó demasiado.";
-                } else {
-                    errorMsg = "Error de conexión.";
+                } else if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError')) {
+                    errorMsg = "Error de conexión (Red).";
                 }
+
                 liveCaption.innerText = errorMsg;
                 if (currentBotBubble) currentBotBubble.remove();
                 if (currentBotDrawerBubble) currentBotDrawerBubble.remove();
@@ -1004,28 +1059,27 @@
         }
 
         function createMessageBubble(rol, texto, isTransient = true, confidence = null) {
-
             let scoreHtml = '';
-            // HTML para el botón de ayuda (ya no se genera aquí, es un botón estático)
-            let helpButtonHtml = '';
+
+            // Botón de guardar nota (AHORA SOLO PARA EL DRAWER)
+            // Usamos un icono de disquete o nota
+            let saveNoteBtn = `
+                <button onclick="saveNote(this, '${rol}')" class="save-note-btn" title="Guardar en Notas">
+                    <span class="material-icons" style="font-size:16px;">bookmark_border</span>
+                </button>
+            `;
 
             console.log(`createMessageBubble - Rol: ${rol}, Conf: ${confidence}, Type: ${typeof confidence}`); // DEBUG
-            // Solo mostramos score si es usuario y tenemos dato
             if (rol === 'user' && confidence !== null) {
-                // Obtenemos el Score HTML (color y etiqueta)
                 scoreHtml = getScoreHtml(confidence);
-
-                // Si estamos repintando una burbuja histórica, NO tocamos el botón flotante (solo responde al último evento)
             }
 
             let orbDiv = null;
-            // Sólo agregar al Orb si es transient (nuevo) O si llamamos explícitamente a esta función para cargar historial reciente
-            // Nota: Para historial cargado, 'isTransient' es false, pero manejaremos la lógica en cargarConversacion
             if (isTransient) {
                 orbDiv = document.createElement('div');
                 orbDiv.classList.add('message', rol);
-                // Insertamos el scoreHtml antes/después del texto (sin botón)
-                orbDiv.innerHTML = `<div class="bubble">${scoreHtml}${texto}</div>`;
+                // EN EL MAIN CHAT: SIN BOTÓN DE NOTAS (LIMPIO)
+                orbDiv.innerHTML = `<div class="bubble">${scoreHtml}<span class="bubble-content">${texto}</span></div>`;
                 messagesBox.appendChild(orbDiv);
                 messagesBox.scrollTo({ top: messagesBox.scrollHeight, behavior: 'smooth' });
 
@@ -1036,21 +1090,15 @@
 
             const drawerDiv = document.createElement('div');
             drawerDiv.classList.add('message', rol);
-            drawerDiv.innerHTML = `<div class="bubble">${scoreHtml}${texto}${helpButtonHtml}</div>`;
+            // EN EL DRAWER: CON BOTÓN DE NOTAS
+            drawerDiv.innerHTML = `<div class="bubble">${scoreHtml}<span class="bubble-content">${texto}</span>${saveNoteBtn}</div>`;
             fullHistoryBox.appendChild(drawerDiv);
             fullHistoryBox.scrollTo({ top: fullHistoryBox.scrollHeight, behavior: 'smooth' });
 
             return { orb: orbDiv, drawer: drawerDiv };
         }
 
-        function createOrbBubbleOnly(rol, texto) {
-            const orbDiv = document.createElement('div');
-            orbDiv.classList.add('message', rol);
-            orbDiv.innerHTML = `<div class="bubble">${texto}</div>`;
-            messagesBox.appendChild(orbDiv);
-            messagesBox.scrollTo({ top: messagesBox.scrollHeight, behavior: 'smooth' });
-            return orbDiv;
-        }
+
 
         function agregarMensaje(rol, texto, confidence = null) {
             createMessageBubble(rol, texto, true, confidence);
@@ -1204,17 +1252,10 @@
 
                     data.mensajes.forEach((msg, index) => {
                         const rol = msg.rol === 'usuario' ? 'user' : 'bot';
-
-                        // Añadir SIEMPRE al Drawer
-                        const drawerDiv = document.createElement('div');
-                        drawerDiv.classList.add('message', rol);
-                        drawerDiv.innerHTML = `<div class="bubble">${msg.contenido}</div>`;
-                        fullHistoryBox.appendChild(drawerDiv);
-
-                        // Añadir SOLO al Orb si es de los últimos 5
-                        if (index >= startOrb) {
-                            createOrbBubbleOnly(rol, msg.contenido);
-                        }
+                        // Si es de los últimos 5, lo mostramos también en el orb (isTransient=true)
+                        // Si no, solo en el historial (isTransient=false)
+                        const showInOrb = index >= startOrb;
+                        createMessageBubble(rol, msg.contenido, showInOrb);
                     });
                 }
 
@@ -1294,35 +1335,9 @@
             }
         }
 
-        window.saveVoiceSettings = async function () {
-            const voice = document.getElementById('setting-voice-code').value;
-            const speed = document.getElementById('setting-speed').value;
-            try {
-                await fetch('/api/settings/voice/', {
-                    method: 'POST',
-                    body: JSON.stringify({ voice_code: voice, speed: speed }),
-                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
-                });
-                const status = document.getElementById('save-status');
-                status.style.display = 'block';
-                setTimeout(() => status.style.display = 'none', 2000);
-            } catch (e) { console.error(e); }
-        }
 
-        window.previewVoice = async function () {
-            const voice = document.getElementById('setting-voice-code').value;
-            try {
-                const response = await fetch('/api/settings/preview-voice/', {
-                    method: 'POST',
-                    body: JSON.stringify({ voice_code: voice }),
-                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
-                });
-                const data = await response.json();
-                if (data.audio_base64) {
-                    new Audio("data:audio/mp3;base64," + data.audio_base64).play();
-                }
-            } catch (e) { console.error(e); }
-        }
+
+
 
         function mostrarCorreccion(original, correccion, explicacion) {
             // Auto-open drawer as requested
@@ -1384,6 +1399,129 @@
 
         function closeGameHub() {
             document.getElementById('game-hub-overlay').classList.remove('visible');
+        }
+
+        // --- SISTEMA DE NOTAS Y Q&A ---
+
+
+        async function loadNotes() {
+            const container = document.getElementById('notes-box');
+            container.innerHTML = '<p style="color:#888; text-align:center; margin-top:20px;">Cargando notas...</p>';
+
+            try {
+                const res = await fetch('/api/notes/');
+                const data = await res.json();
+
+                if (data.notas && data.notas.length > 0) {
+                    container.innerHTML = '';
+                    data.notas.forEach(nota => {
+                        const noteCard = document.createElement('div');
+                        noteCard.className = 'note-card'; // Necesitaremos CSS para esto
+                        noteCard.innerHTML = `
+                            <div class="note-content">${formatNoteText(nota.contenido)}</div>
+                            <div class="note-footer">
+                                <small>${nota.fecha}</small>
+                                <button onclick="deleteNote(${nota.id})" class="delete-note-btn">
+                                    <span class="material-icons" style="font-size:16px;">delete</span>
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(noteCard);
+                    });
+                } else {
+                    container.innerHTML = '<p class="no-errors-msg" style="color:#666; text-align:center; margin-top:20px;">No tienes notas guardadas aún.</p>';
+                }
+            } catch (e) {
+                console.error("Error loading notes:", e);
+                container.innerHTML = '<p style="color:#f28b82; text-align:center;">Error al cargar notas.</p>';
+            }
+        }
+
+        async function saveNote(btn, rol) {
+            // Encontrar el texto de la burbuja correspondiente
+            // El botón está DENTRO de .bubble, así que subimos al padre
+            const bubble = btn.closest('.bubble');
+            // Clonamos para no obtener el texto del botón ni del score
+            const clone = bubble.cloneNode(true);
+
+            // Eliminar elementos basura del clon antes de extraer texto
+            const trash = clone.querySelectorAll('.score-tooltip, .pronunciation-score, .save-note-btn, .help-btn');
+            trash.forEach(el => el.remove());
+
+            const texto = clone.innerText.trim();
+
+            if (!texto) return;
+
+            // Animación de carga
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = '<span class="material-icons spinning" style="font-size:16px;">sync</span>';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/notes/save/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contenido: texto })
+                });
+
+                if (res.ok) {
+                    // Éxito visual
+                    btn.innerHTML = '<span class="material-icons" style="font-size:16px; color:#4CAF50;">check</span>';
+                    setTimeout(() => {
+                        btn.innerHTML = '<span class="material-icons" style="font-size:16px;">bookmark</span>'; // Icono "relleno" indica guardado
+                        btn.disabled = false;
+                    }, 2000);
+
+                    // Si el drawer está abierto, recargar
+                    if (isNotesDrawerOpen) loadNotes();
+                } else {
+                    throw new Error("Error saving");
+                }
+            } catch (e) {
+                console.error(e);
+                btn.innerHTML = '<span class="material-icons" style="font-size:16px; color:red;">error</span>';
+                setTimeout(() => {
+                    btn.innerHTML = originalIcon;
+                    btn.disabled = false;
+                }, 2000);
+            }
+        }
+
+        let pendingDeleteNoteId = null;
+
+        function showDeleteModal(id) {
+            pendingDeleteNoteId = id;
+            document.getElementById('delete-confirm-modal').classList.add('visible');
+        }
+
+        function hideDeleteModal() {
+            document.getElementById('delete-confirm-modal').classList.remove('visible');
+            pendingDeleteNoteId = null;
+        }
+
+        async function confirmDeleteNote() {
+            if (!pendingDeleteNoteId) return;
+            const id = pendingDeleteNoteId;
+            hideDeleteModal();
+
+            try {
+                const res = await fetch(`/api/notes/delete/${id}/`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadNotes();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Legacy wrapper: called from note cards
+        async function deleteNote(id) {
+            showDeleteModal(id);
+        }
+
+        function formatNoteText(text) {
+            // Simple formateo: convierte saltos de línea en <br>
+            return text.replace(/\n/g, '<br>');
         }
 
         function switchTab(tabId) {
@@ -1628,11 +1766,19 @@
                         item.style.borderLeft = '4px solid #CF6679';
 
                         const scorePct = Math.round(err.confidence * 100);
+                        const rawText = err.texto_corregido_fonetico || err.texto_original;
+                        // Escape double quotes for HTML attribute
+                        const safeText = rawText.replace(/"/g, '&quot;');
 
                         item.innerHTML = `
                             <div class="error-header" style="justify-content: space-between;">
                                 <span style="font-size: 0.8rem; color: #999;">${err.timestamp}</span>
-                                <span class="score-badge" style="background: #CF6679; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">${scorePct}%</span>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="score-badge" style="background: #CF6679; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">${scorePct}%</span>
+                                    <button class="icon-btn-small play-tip-btn" data-text="${safeText}" title="Escuchar pronunciación">
+                                        <span class="material-icons" style="font-size: 1.2rem; color: #BB86FC;">volume_up</span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="error-original" style="text-decoration: none;">"${err.texto_original}"</div>
                             ${err.texto_corregido_fonetico ? `<div class="error-correction" style="color: #FFEA00;">Intento: "${err.texto_corregido_fonetico}"</div>` : ''}
@@ -1653,6 +1799,30 @@
         window.cerrarAyudaFonetica = function () {
             console.log("cerrarAyudaFonetica called");
             document.getElementById('pronunciation-popover').classList.remove('visible');
+        };
+
+        // Función dedicada para la lista del historial
+        window.playPronunciationTip = async function (textToPlay) {
+            if (!textToPlay) return;
+
+            try {
+                // Feedback visual simple (opcional, global o toast)
+                console.log("Reproduciendo:", textToPlay);
+
+                const res = await fetch('/api/tts_word/', {
+                    method: 'POST',
+                    body: JSON.stringify({ text: textToPlay, lang: 'en-US' }), // Siempre pronunciación en inglés para practicar
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                });
+                const data = await res.json();
+
+                if (data.audio_base64) {
+                    const audio = new Audio("data:audio/mp3;base64," + data.audio_base64);
+                    audio.play();
+                }
+            } catch (e) {
+                console.error("Error TTS History:", e);
+            }
         };
 
         window.reproducirPalabra = async function () {
@@ -1688,18 +1858,24 @@
 
         // --- GLOBAL EVENT DELEGATION (Robust Fix) ---
         document.addEventListener('click', function (e) {
-            // Buscamos el botón (o su hijo icon)
-            const btn = e.target.closest('.pronunciation-help-btn');
-            if (btn) {
-                console.log("Global delegate clicked:", btn);
-                const text = btn.dataset.text;
-                if (text) {
-                    window.mostrarAyudaFonetica(text);
-                } else {
-                    console.warn("Button has no data-text!");
-                }
+            // 1. Ayuda Fonética (Pop-up)
+            const btnHelp = e.target.closest('.pronunciation-help-btn');
+            if (btnHelp) {
+                const text = btnHelp.dataset.text;
+                if (text) window.mostrarAyudaFonetica(text);
                 e.preventDefault();
                 e.stopPropagation();
+                return;
+            }
+
+            // 2. Reproducir Audio del Historial
+            const btnPlay = e.target.closest('.play-tip-btn');
+            if (btnPlay) {
+                const text = btnPlay.dataset.text;
+                if (text) window.playPronunciationTip(text);
+                e.preventDefault();
+                e.stopPropagation();
+                return;
             }
         }, true);
 
@@ -1786,6 +1962,9 @@
 
             // 1. Quitar resaltado anterior
             document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+            // Clean sidebar elevation
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) sidebar.classList.remove('sidebar-elevated');
 
             if (!target) {
                 console.error("Elemento no encontrado:", step.elementId);
@@ -1811,6 +1990,12 @@
             // 2. Resaltar nuevo objetivo
             target.classList.add('tutorial-highlight');
             target.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Asegurar que se ve
+
+            // Elevate sidebar if needed (Fix for z-index/stacking context)
+            if (target.closest('.sidebar')) {
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar) sidebar.classList.add('sidebar-elevated');
+            }
 
             // 3. Llenar info
             document.getElementById('tut-title').innerText = step.title;
@@ -1860,6 +2045,8 @@
             document.getElementById('tutorial-overlay').classList.remove('active');
             document.getElementById('tutorial-card').style.display = 'none';
             document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) sidebar.classList.remove('sidebar-elevated');
         }
 
         // AUTO-INICIO (Opcional): Si es la primera vez que entra en este navegador
@@ -1888,7 +2075,8 @@
                 <span class="material-icons">school</span>
                 Tip de Aprendizaje
             </div>
-            <div id="coach-original" style="font-style:italic; font-size:0.9rem; color:#ccc; margin-bottom:5px;"></div>
+            <div id="coach-original" style="font-style:italic; font-size:0.9rem; color:#ccc; margin-bottom:5px;">
+            </div>
             <div id="coach-correction" style="font-weight:bold; color:#fff; margin-bottom:5px;"></div>
             <div id="coach-explanation" style="font-size:0.85rem; color:#bbb;"></div>
         </div>
@@ -1906,7 +2094,22 @@
             </button>
         </div>
     </div>
+
+    <!-- Modal de Confirmación de Eliminación -->
+    <div id="delete-confirm-modal" class="delete-modal-overlay" onclick="if(event.target===this) hideDeleteModal()">
+        <div class="delete-modal-card">
+            <span class="material-icons modal-icon">delete_forever</span>
+            <h3>¿Eliminar esta nota?</h3>
+            <p>Esta acción no se puede deshacer.</p>
+            <div class="delete-modal-actions">
+                <button class="btn-modal-cancel" onclick="hideDeleteModal()">Cancelar</button>
+                <button class="btn-modal-delete" onclick="confirmDeleteNote()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/transitions.js' %}"></script>
 </body>
 
+
 </html>
-```
