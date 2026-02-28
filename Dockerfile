@@ -1,5 +1,7 @@
 FROM python:3.11-slim
 
+ENV PYTHONUNBUFFERED=1
+
 # Instalar dependencias del sistema para pycairo, mysqlclient, etc.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libcairo2-dev \
@@ -26,5 +28,5 @@ RUN python manage.py collectstatic --noinput || true
 EXPOSE 8000
 
 # Comando de inicio
-CMD python manage.py migrate && gunicorn naza.wsgi:application --bind 0.0.0.0:$PORT --log-level debug
+CMD python manage.py migrate && gunicorn naza.wsgi:application --bind 0.0.0.0:${PORT:-8000} --log-level debug
 
