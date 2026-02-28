@@ -2,17 +2,10 @@
 nixPkgs = [
     "cairo",
     "pkg-config",
-    "libffi"
+    "libffi",
+    "gcc"
 ]
 aptPkgs = [
-    "python3-dev",
-    "build-essential",
-    "default-libmysqlclient-dev",
-    "libcairo2-dev"
-]
-
-[phases.install]
-cmds = [
-    "python -m pip install --upgrade pip setuptools wheel",
-    "python -m pip install -r requirements.txt"
+    "libcairo2-dev",
+    "build-essential"
 ]
