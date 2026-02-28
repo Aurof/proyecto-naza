@@ -1,0 +1,8 @@
+[phases.setup]
+aptPkgs = [
+    "libcairo2-dev",
+    "pkg-config",
+    "default-libmysqlclient-dev",
+    "python3-dev",
+    "build-essential"
+]
