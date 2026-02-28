@@ -26,4 +26,5 @@ RUN python manage.py collectstatic --noinput || true
 EXPOSE 8000
 
 # Comando de inicio
-CMD python manage.py migrate && gunicorn naza.wsgi:application --bind 0.0.0.0:$PORT
+CMD python manage.py migrate && gunicorn naza.wsgi:application --bind 0.0.0.0:$PORT --log-level debug
+
