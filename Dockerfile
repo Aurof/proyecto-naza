@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     build-essential \
     default-libmysqlclient-dev \
+    dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -27,6 +28,10 @@ RUN python manage.py collectstatic --noinput || true
 # Exponer el puerto
 EXPOSE 8000
 
+# Archivo de inicio
+COPY start.sh .
+RUN dos2unix start.sh && chmod +x start.sh
+
 # Comando de inicio
-CMD python manage.py migrate && gunicorn naza.wsgi:application --bind 0.0.0.0:${PORT:-8000} --log-level debug
+CMD ["/app/start.sh"]
 
