@@ -87,16 +87,15 @@ WSGI_APPLICATION = 'naza.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='mysql://root:@localhost:3306/naza_db',
+        default=f'sqlite:///{os.path.join(BASE_DIR, "db.sqlite3")}',
         conn_max_age=600,
         conn_health_checks=True,
     )
 }
-# Fallback para XAMPP local si no detecta la variable DATABASE_URL de Railway
-if not os.getenv('DATABASE_URL'):
-    DATABASES['default']['OPTIONS'] = {
-        'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
-    }
+
+# Fallback local para XAMPP: Si se cargó MySQL desde el .env local, aplicamos la configuración
+if DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+    DATABASES['default']['OPTIONS'] = {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
