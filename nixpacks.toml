@@ -1,11 +1,14 @@
 [phases.setup]
-aptPkgs = [
-    "libcairo2-dev",
+nixPkgs = [
+    "cairo",
     "pkg-config",
+    "libffi"
+]
+aptPkgs = [
     "python3-dev",
-    "libgirepository1.0-dev",
     "build-essential",
-    "default-libmysqlclient-dev"
+    "default-libmysqlclient-dev",
+    "libcairo2-dev"
 ]
 
 [phases.install]
