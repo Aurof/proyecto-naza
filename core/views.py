@@ -453,14 +453,22 @@ def chat_interaction(request):
 # SECCIÓN 3: APIs DE GOOGLE CLOUD (STT y TTS)
 # ---------------------------------------------------------
 
-# Cliente STT global para reutilizar conexión
-stt_client = speech.SpeechClient()
+# Cliente STT global para reutilizar conexión (inicializado lazy)
+stt_client = None
 
 @csrf_exempt
 def speech_to_text_api(request):
     """API para convertir audio del micrófono a texto"""
     if request.method != 'POST':
         return JsonResponse({'error': 'Solo POST'}, status=405)
+
+    global stt_client
+    if stt_client is None:
+        try:
+            stt_client = speech.SpeechClient()
+        except Exception as e:
+            return JsonResponse({'error': f'STT init error: {str(e)}'}, status=500)
+
     try:
         data = json.loads(request.body)
         audio_base64 = data.get('audio_base64')
